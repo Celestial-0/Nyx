@@ -1,0 +1,1 @@
+export { healthModule } from "@/modules/health/health.module";
