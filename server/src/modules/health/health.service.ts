@@ -1,38 +1,45 @@
-export const healthService = async (db: any, redis: any) => {
-  let dbStatus = "ok";
-  let redisStatus = "ok";
+import { HealthData, ServiceStatus, HealthDb, HealthRedis } from "@/modules/health/health.type";
 
-  // DB check
-  try {
-    await db.execute("SELECT 1");
-  } catch {
-    dbStatus = "error";
-  }
+export const healthService = async (
+    db: HealthDb,
+    redis: HealthRedis
+): Promise<HealthData> => {
+    let dbStatus: ServiceStatus = "ok";
+    let redisStatus: ServiceStatus = "ok";
 
-  // Redis check
-  try {
-    await redis.ping();
-  } catch {
-    redisStatus = "error";
-  }
+    // DB check
+    try {
+        await db.execute("SELECT 1");
+    } catch {
+        dbStatus = "error";
+    }
 
-  const overall =
-    dbStatus === "ok" && redisStatus === "ok"
-      ? "ok"
-      : "degraded";
+    // Redis check
+    try {
+        await redis.ping();
+    } catch {
+        redisStatus = "error";
+    }
 
-  const time = new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata",
-    dateStyle: "medium",
-    timeStyle: "long",
-  }).format(new Date());
+    const overall =
+        dbStatus === "ok" && redisStatus === "ok"
+            ? "ok"
+            : dbStatus === "error" && redisStatus === "error"
+                ? "degraded"
+                : "partial";
 
-  return {
-    status: overall,
-    services: {
-      db: dbStatus,
-      redis: redisStatus,
-    },
-    time,
-  };
+    const time = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        dateStyle: "medium",
+        timeStyle: "long",
+    }).format(new Date());
+
+    return {
+        status: overall,
+        services: {
+            db: dbStatus,
+            redis: redisStatus,
+        },
+        time,
+    };
 };

@@ -42,3 +42,6 @@ package-lock.json
 **/*.bun
 
 docs
+.agents
+.github
+.vscode

@@ -1,8 +1,9 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { openapi } from "@elysiajs/openapi";
+import { success } from "@/utils/response";
 
 // plugins
-import { loggerPlugin, errorPlugin, responsePlugin, dbPlugin, redisPlugin, jwtPlugin, eventPlugin } from "@/plugins";
+import { loggerPlugin, errorPlugin, coreInfraPlugin } from "@/plugins";
 
 
 // modules
@@ -16,12 +17,23 @@ export const nyxApp = () => {
     // OpenAPI 
     .use(
       openapi({
+        path: "/docs",
         documentation: {
           info: {
             title: "Nyx API",
             version: "0.1.0",
-            description: "Anonymous decentralized API",
+            description: "Anonymous decentralized Chat App",
           },
+          tags: [
+            {
+              name: "System",
+              description: "General API metadata and base endpoints",
+            },
+            {
+              name: "Health",
+              description: "System health and dependency checks",
+            },
+          ],
         },
       })
     )
@@ -32,21 +44,26 @@ export const nyxApp = () => {
     // Error handling 
     .use(errorPlugin)
 
-    // Response formatter 
-    .use(responsePlugin)
-
-    // Core infra 
-    .use(dbPlugin)
-    .use(redisPlugin)
-    .use(jwtPlugin)
-    .use(eventPlugin)
-    
-    
+    // Core infra
+    .use(coreInfraPlugin)
+      
     // Modules
     .use(healthModule)
     
     // Routes
-    .get("/", () => "Welcome to Nyx API");
+    .get("/", () => success("Welcome to Nyx API"), {
+      detail: {
+        tags: ["System"],
+        summary: "API welcome route",
+        description: "Returns a simple welcome message for the Nyx API.",
+      },
+      response: {
+        200: t.Object({
+          success: t.Literal(true),
+          data: t.String(),
+        }),
+      },
+    });
 
   return app;
 };
