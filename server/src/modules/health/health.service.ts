@@ -1,9 +1,11 @@
-import { HealthData, ServiceStatus, HealthDb, HealthRedis } from "@/modules/health/health.type";
+import { HealthData, ServiceStatus } from "@/modules/health/health.type";
+import { healthSuccessResponseSchema } from "@/modules/health/health.schema";
 
 export const healthService = async (
-    db: HealthDb,
-    redis: HealthRedis
+    db: any,
+    redis: any
 ): Promise<HealthData> => {
+
     let dbStatus: ServiceStatus = "ok";
     let redisStatus: ServiceStatus = "ok";
 
@@ -42,4 +44,15 @@ export const healthService = async (
         },
         time,
     };
+};
+
+export const healthMeta ={
+  detail: {
+    tags: ["Health"],
+    summary: "Health check",
+    description: "Checks API dependencies like Postgres and Redis.",
+  },
+  response: {
+    200: healthSuccessResponseSchema,
+  },
 };

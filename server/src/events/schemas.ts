@@ -15,48 +15,79 @@ const contextSchema = z.object({
 
 export const eventSchemas = {
   // MESSAGE
-  "message:created": z.object({
+  "chat:message:created": z.object({
     id: z.string(),
     senderId: z.string(),
     text: z.string(),
     createdAt: z.string(),
   }).and(contextSchema),
 
-  "message:deleted": z.object({
+  "chat:message:deleted": z.object({
     id: z.string(),
   }).and(contextSchema),
 
-  "message:read": z.object({
+  "chat:message:read": z.object({
     messageId: z.string(),
     userId: z.string(),
   }).and(contextSchema),
 
   // PRESENCE
-  "user:online": z.object({
+  "presence:user:online": z.object({
     userId: z.string(),
   }),
 
-  "user:offline": z.object({
+  "presence:user:offline": z.object({
     userId: z.string(),
   }),
 
   // TYPING
-  "user:typing:start": z.object({
+  "presence:typing:started": z.object({
     userId: z.string(),
   }).and(contextSchema),
 
-  "user:typing:stop": z.object({
+  "presence:typing:stopped": z.object({
     userId: z.string(),
   }).and(contextSchema),
 
   // ROOM
-  "room:joined": z.object({
+  "chat:room:joined": z.object({
     roomId: z.string(),
     userId: z.string(),
   }),
 
-  "room:left": z.object({
+  "chat:room:left": z.object({
     roomId: z.string(),
     userId: z.string(),
+  }),
+
+  // AUTH
+  "auth:session:created": z.object({
+    userId: z.string(),
+    walletAddress: z.string(),
+    sessionId: z.string(),
+    firstSignIn: z.boolean(),
+  }),
+
+  "auth:session:terminated": z.object({
+    userId: z.string(),
+    sessionId: z.string(),
+  }),
+
+  "auth:profile:completed": z.object({
+    userId: z.string(),
+    walletAddress: z.string(),
+    username: z.string(),
+    displayName: z.string(),
+  }),
+
+  // WEBSOCKET
+  "websocket:user:connected": z.object({
+    userId: z.string(),
+    timestamp: z.string(),
+  }),
+
+  "websocket:user:disconnected": z.object({
+    userId: z.string(),
+    timestamp: z.string(),
   }),
 };

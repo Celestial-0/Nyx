@@ -156,7 +156,7 @@ export function Waitlist() {
             {/* Ambient glow */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <motion.div
-                    className="absolute top-1/4 left-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]"
+                    className="absolute top-1/4 left-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]"
                     animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
                     transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 />

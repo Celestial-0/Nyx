@@ -1,5 +1,5 @@
 {
-  "id": "705d3ae7-00a4-4c86-ae66-f3fd5d43b2bd",
+  "id": "ca2cb739-3171-4037-b458-d1f9ed5b22a6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -23,6 +23,12 @@
         },
         "username": {
           "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "full_name": {
+          "name": "full_name",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -419,9 +425,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigint",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "room_id": {
           "name": "room_id",

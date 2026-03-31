@@ -1,23 +1,43 @@
-import { Elysia, t } from "elysia";
+import { Elysia} from "elysia";
 import { openapi } from "@elysiajs/openapi";
-import { success } from "@/utils/response";
+import { cors } from "@elysiajs/cors";
 
-// plugins
-import { loggerPlugin, errorPlugin, coreInfraPlugin } from "@/plugins";
+import {
+  loggerPlugin,
+  errorPlugin,
+  dbPlugin,
+  redisPlugin,
+  jwtPlugin,
+  eventPlugin,
+  authPlugin,
+} from "@/plugins";
+import { authModule, healthModule, usersModule } from "@/modules";
 
-
-// modules
-import { healthModule } from "@/modules";
-
+const nyx = new Elysia()
+    .use(dbPlugin)
+    .use(redisPlugin)
+    .use(jwtPlugin)
+    .use(eventPlugin)
+    .use(authPlugin);
+export type NyxContext = typeof nyx;
 
 export const nyxApp = () => {
-  const app = new Elysia();
-
-  app
-    // OpenAPI 
+  return nyx
+    .use(loggerPlugin)
+    .use(errorPlugin)
+    .use(cors({
+      origin: ["http://localhost:3000", "http://localhost:3001", "http://192.168.117.51:3000", "http://192.168.117.51:3001"],
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }))
+    .use(healthModule)
+    .use(authModule)
+    .use(usersModule)
     .use(
       openapi({
         path: "/docs",
+        // provider: "swagger-ui",
         documentation: {
           info: {
             title: "Nyx API",
@@ -25,45 +45,16 @@ export const nyxApp = () => {
             description: "Anonymous decentralized Chat App",
           },
           tags: [
-            {
-              name: "System",
-              description: "General API metadata and base endpoints",
-            },
-            {
-              name: "Health",
-              description: "System health and dependency checks",
-            },
+            { name: "Health", description: "System checks" },
+            { name: "Auth", description: "Wallet authentication flow" },
+            { name: "Users", description: "User identity and profile endpoints" },
           ],
         },
       })
     )
-
-    // Logging 
-    .use(loggerPlugin)
-
-    // Error handling 
-    .use(errorPlugin)
-
-    // Core infra
-    .use(coreInfraPlugin)
-      
-    // Modules
-    .use(healthModule)
-    
-    // Routes
-    .get("/", () => success("Welcome to Nyx API"), {
+    .get("/", () => "Welcome to Nyx API", {
       detail: {
-        tags: ["System"],
-        summary: "API welcome route",
-        description: "Returns a simple welcome message for the Nyx API.",
-      },
-      response: {
-        200: t.Object({
-          success: t.Literal(true),
-          data: t.String(),
-        }),
+        hide: true,
       },
     });
-
-  return app;
 };

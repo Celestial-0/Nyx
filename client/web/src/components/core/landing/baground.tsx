@@ -1,5 +1,5 @@
 import { FlickeringGrid } from '@/components/ui/flickering-grid'
-import { useTheme } from '@/components/provider/theme-provider'
+import { useTheme } from '@/context/ui.context'
 
 export const Background = () => {
   const { theme } = useTheme()

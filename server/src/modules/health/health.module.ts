@@ -1,4 +1,6 @@
 import { Elysia } from "elysia";
-import { healthRoute } from "@/modules/health/health.route";
+import { healthHandler } from "@/modules/health/health.handler";
 
-export const healthModule = new Elysia().use(healthRoute);
+export const healthModule = new Elysia({
+    name: "health.module",
+}).use(healthHandler);

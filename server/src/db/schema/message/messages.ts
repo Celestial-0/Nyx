@@ -1,6 +1,5 @@
 import {
   pgTable,
-  bigint,
   uuid,
   jsonb,
   timestamp,
@@ -11,7 +10,7 @@ import { messageTypeEnum } from "@/db/schema/message/message.enums";
 export const messages = pgTable(
   "messages",
   {
-    id: bigint("id", { mode: "number" }).primaryKey(),
+    id: uuid("id").primaryKey().defaultRandom(),
 
     roomId: uuid("room_id").notNull(),
     senderId: uuid("sender_id"),

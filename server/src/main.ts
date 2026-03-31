@@ -1,9 +1,7 @@
 import { nyxApp } from "@/app";
 import { env } from "@/config/env";
 
-const app = nyxApp();
-
-app.listen(env.PORT);
+const app = nyxApp().listen(env.PORT);
 
 console.log(
   `🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`

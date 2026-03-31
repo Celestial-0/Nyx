@@ -8,6 +8,7 @@ CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"wallet_address" text NOT NULL,
 	"username" text,
+	"full_name" text,
 	"role" "user_role" DEFAULT 'user',
 	"is_banned" boolean DEFAULT false,
 	"last_seen_at" timestamp with time zone,
@@ -65,7 +66,7 @@ CREATE TABLE "room_members" (
 );
 --> statement-breakpoint
 CREATE TABLE "messages" (
-	"id" bigint PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"room_id" uuid NOT NULL,
 	"sender_id" uuid,
 	"content" jsonb NOT NULL,
