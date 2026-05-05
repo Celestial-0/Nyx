@@ -19,10 +19,12 @@ Users connect via wallet addresses, eliminating the need for emails or passwords
 ## Tech Stack
 
 - **Frontend:** Tanstack Start
-- **Backend:** Elysia (Node.js)
+- **Backend:** Hono + Bun
 - **Database:** PostgreSQL + Drizzle ORM
 - **Cache & Pub/Sub:** Redis
 - **Blockchain:** Solana
+
+Backend architecture and delivery docs live in [server/docs](./server/docs).
 
 ## Philosophy
 

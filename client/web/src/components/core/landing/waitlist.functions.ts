@@ -1,16 +1,32 @@
 import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
-import { getDb } from "@/lib/db"
 
 const JoinWaitlistSchema = z.object({
   email: z.email("Please enter a valid email address"),
 })
 
+let dbPromise:
+  | Promise<import("@libsql/client").Client>
+  | null = null
+
+async function getDb() {
+  if (!dbPromise) {
+    dbPromise = import("@libsql/client").then(({ createClient }) =>
+      createClient({
+        url: process.env.TURSO_DATABASE_URL!,
+        authToken: process.env.TURSO_AUTH_TOKEN,
+      })
+    )
+  }
+
+  return dbPromise
+}
+
 // Ensure the waitlist table exists (runs once on first call)
 let tableCreated = false
 async function ensureTable() {
   if (tableCreated) return
-  const db = getDb()
+  const db = await getDb()
   await db.execute(`
     CREATE TABLE IF NOT EXISTS waitlist (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +41,7 @@ export const joinWaitlist = createServerFn({ method: "POST" })
   .inputValidator(JoinWaitlistSchema)
   .handler(async ({ data }) => {
     await ensureTable()
-    const db = getDb()
+    const db = await getDb()
 
     try {
       await db.execute({

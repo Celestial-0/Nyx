@@ -1,11 +1,10 @@
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { UIProvider } from "@/context/ui.context";
-import { SolanaProvider } from "@/context/solana.context";
-import { AuthProvider } from "@/context/auth.context";
-import appCss from "../styles.css?url";
+import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router"
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
+import { TanStackDevtools } from "@tanstack/react-devtools"
+import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { SolanaProvider } from "@/context/solana.context"
+import appCss from "../styles.css?url"
 
 export const Route = createRootRoute({
   head: () => ({
@@ -53,18 +52,17 @@ function RootNotFound() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body suppressHydrationWarning>
-        <UIProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <SolanaProvider>
-            <AuthProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-            </AuthProvider>
-          </SolanaProvider>
-        </UIProvider>
+        <SolanaProvider>
+          <TooltipProvider>
+            {children}
+            <Toaster position="top-right" />
+          </TooltipProvider>
+        </SolanaProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",

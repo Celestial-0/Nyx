@@ -1,16 +1,12 @@
-import { FlickeringGrid } from '@/components/ui/flickering-grid'
-import { useTheme } from '@/context/ui.context'
+import { FlickeringGrid } from "@/components/ui/flickering-grid"
 
 export const Background = () => {
-  const { theme } = useTheme()
-  const color = theme === "dark" ? "#6B7280" : "#9f00d4";
-  
   return (
     <FlickeringGrid
       className="fixed inset-0 -z-10"
       squareSize={4}
       gridGap={6}
-      color={color}
+      color="#6B7280"
       maxOpacity={0.5}
       flickerChance={0.1}
     />
