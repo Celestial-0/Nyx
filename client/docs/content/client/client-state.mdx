@@ -1,0 +1,38 @@
+---
+title: Client State Management
+description: Zustand and Optimistic UI in the React Frontend
+---
+
+# Client State Management
+
+Nyx utilizes a highly reactive, local-first architecture on the frontend. The goal is to provide a "zero-latency" feel, meaning user interactions immediately update the UI without waiting for network confirmations.
+
+## The Store (Zustand)
+
+Instead of relying heavily on React Context or deeply prop-drilling state, Nyx uses [Zustand](https://github.com/pmndrs/zustand) for global state management. The state is divided into specific feature slices:
+
+- **`chat.store.ts`**: The largest and most complex store. It manages active conversations, message histories, typing indicators, read receipts, and real-time connection status.
+- **`user.store.ts`**: Manages the local user profile, UI preferences (theme, compact mode), and privacy settings (presence sharing). It is persisted to `localStorage`.
+- **`auth.store.ts`**: Manages the JWT tokens and session metadata.
+
+## Optimistic UI Updates
+
+When a user performs an action, the application state is immediately mutated.
+
+<Mermaid
+  chart={`stateDiagram-v2
+    [*] --> Typing
+    Typing --> LocalStore: User presses Send
+    LocalStore --> UI: Renders message instantly (Status: Pending)
+    LocalStore --> Network: Dispatches Encrypted Payload
+    Network --> LocalStore: Receives 'chat:delivery:ack'
+    LocalStore --> UI: Updates status to Sent`}
+/>
+
+If the network request fails, the store catches the rejection and flags the message as "Failed," allowing the user to seamlessly retry.
+
+## WebSocket Handlers
+
+The frontend does not treat the WebSocket purely as a data pipe; it acts as a Redux-style action dispatcher. When a frame arrives from the server, it is parsed and dispatched directly into `chat.store.ts` to mutate the state tree.
+
+For example, when a `chat:typing:start` frame is received, the store adds the `userId` to the active typers array for that specific `conversationId`, instantly triggering a re-render of the typing indicator in the UI.

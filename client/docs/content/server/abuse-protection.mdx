@@ -1,0 +1,42 @@
+---
+title: Abuse Protection
+description: Rate limiting, throttling, and automated bans
+---
+
+# Abuse Protection
+
+To ensure platform stability and protect against malicious actors (e.g., spamming message creation, DDoS via WebSocket connections), Nyx employs a multi-tiered abuse protection layer backed by Redis.
+
+## Token Buckets & Rate Limiting
+
+The server uses a standard Token Bucket algorithm implemented natively in Redis via Lua scripts. This ensures rate limits are perfectly synchronized across the entire horizontally scaled cluster.
+
+### Common Policies
+- **HTTP Endpoint Rate Limits**: Standard API routes (e.g., `/auth/nonce`) have strict rate limits (e.g., 5 requests per 10 seconds) to prevent brute force or denial-of-service attempts.
+- **WebSocket Message Limits**: Sending messages via the WebSocket connection is throttled (e.g., 10 messages per second). If a user exceeds this, they receive a `chat:message:rejected` event with a `code: RATE_LIMITED` and a `retryAfterMs` payload.
+
+## Invalid Frame Policy
+
+WebSockets are particularly vulnerable to fuzzing and malformed payloads. If a user repeatedly sends malformed JSON or payloads that fail Zod validation, Nyx will automatically trigger the **Invalid Frame Policy**.
+
+1. **Threshold**: If a single session exceeds `X` invalid frames within a time window.
+2. **Action**: The user's WebSocket connection is instantly terminated with a `1008 Policy Violation` code.
+3. **Cooldown**: The user is placed in a Redis-backed cooldown period (e.g., 5 minutes) during which they cannot establish a new WebSocket connection. Any attempt to reconnect will be immediately rejected.
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant C as Malicious Client
+    participant API as Nyx Server
+    participant R as Redis
+
+    C->>API: Send Malformed Payload
+    API->>R: Increment Invalid Frame Counter
+    R-->>API: Threshold Exceeded!
+    API->>C: Close Socket (1008)
+    API->>R: Set Cooldown TTL (5 mins)
+    
+    C->>API: Attempt Reconnect
+    API->>R: Check Cooldown
+    R-->>API: Still in Cooldown
+    API->>C: Reject Connection (4008 Rate Limited)`}
+/>

@@ -1,0 +1,68 @@
+---
+title: API Endpoints
+description: REST API Contracts
+---
+
+# REST API Endpoints
+
+The Nyx server utilizes `@hono/zod-openapi` to strictly type all HTTP endpoints. The actual request/response structures map exactly to the underlying Zod schemas found in `server/src/features/**/schema.ts`.
+
+## Authentication Flow
+
+### `POST /auth/nonce`
+Requests a cryptographically secure nonce to be signed by the client's wallet.
+- **Request Body**: `{ walletAddress: string }`
+- **Response**: `{ nonce: string }`
+
+### `POST /auth/verify`
+Submits the signed nonce to authenticate the user and obtain a JWT.
+- **Request Body**: `{ signature: string, walletAddress: string }`
+- **Response**: `{ token: string, user: UserProfile }`
+
+### `POST /auth/logout`
+Revokes the current session and JWT.
+- **Headers**: `Authorization: Bearer <token>`
+- **Response**: `204 No Content`
+
+## User Profile
+
+### `GET /users/me`
+Retrieves the currently authenticated user's profile and active device status.
+- **Headers**: `Authorization: Bearer <token>`
+- **Response**: `{ id, walletAddress, role, prekeyStatus, activeDevice }`
+
+### `PATCH /users/me`
+Updates user profile metadata.
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**: `{ displayName?: string, avatarUrl?: string }`
+- **Response**: Updated user profile object
+
+## Conversations (Rooms)
+
+### `GET /chat/conversations`
+Lists all conversations the authenticated user is a member of.
+- **Headers**: `Authorization: Bearer <token>`
+- **Response**: `Array<ConversationItem>`
+
+### `POST /chat/conversations/direct`
+Creates or retrieves a 1:1 conversation with another user.
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**: `{ peerId: string }`
+- **Response**: `ConversationItem`
+
+### `POST /chat/conversations/group`
+Creates a new group conversation.
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**: `{ name?: string, initialMemberIds?: string[] }`
+- **Response**: `ConversationItem`
+
+## Key Exchange & E2EE
+
+### `GET /chat/keys/:userId`
+Fetches a user's Public Identity Key and a signed One-Time PreKey to initiate an encrypted session.
+- **Response**: `{ identityKey: string, preKey: { keyId: string, publicKey: string, signature: string } }`
+
+### `POST /chat/keys`
+Uploads new One-Time PreKeys for the current user to replenish the Server's stock.
+- **Request Body**: `Array<PreKey>`
+- **Response**: `200 OK`

@@ -1,0 +1,30 @@
+---
+title: Client Architecture
+description: A light overview of the Nyx React frontend
+---
+
+# Client Architecture
+
+Nyx's client is a React application built with Vite and TailwindCSS. It is designed to be extremely lightweight, deferring heavy computation to the server where possible, while relying heavily on local state for a snappy user experience.
+
+## Core Stack
+- **React 19**: Component UI rendering.
+- **Zustand**: Global state management.
+- **TailwindCSS**: Utility-first styling.
+- **Framer Motion**: Subtle, performant micro-animations.
+- **TweetNaCl / bs58**: Fast Ed25519 signature generation and E2EE.
+
+## File Structure
+
+The `src/` directory is logically separated by feature:
+- `components/`: Pure, reusable React UI components (buttons, dialogs, forms).
+- `features/`: The meat of the application. Contains domain logic, including:
+  - `auth/`: Wallet signing and session management.
+  - `chat/`: The WebSockets engine (`chat.ws.ts`), Zustand store (`chat.store.ts`), and Realtime Hooks (`chat.hooks.ts`).
+  - `user/`: Profile management and UI preference toggles.
+- `lib/`: Shared utilities, cryptographic wrappers, and fetch interceptors.
+
+## Render Flow
+1. **Auth Gate**: The `App` mounts and immediately checks for a stored JWT. If absent, it renders the Auth layer.
+2. **WebSockets**: Upon successful authentication, the `useChatRealtime` hook mounts the WebSocket client and attempts connection.
+3. **Optimistic UI**: All UI actions are handled locally first. When the user sends a message, it is instantly added to the Zustand store, the DOM updates, and the encrypted payload is pushed across the socket in the background.

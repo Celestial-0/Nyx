@@ -1,0 +1,56 @@
+---
+title: End-to-End Encryption
+description: Signal-style Double Ratchet and Sender Keys
+---
+
+# End-to-End Encryption (E2EE)
+
+Nyx ensures absolute privacy by employing robust cryptographic protocols inspired by the Signal protocol. The server is designed as a "dumb router"—it only distributes keys and encrypted ciphertext payloads, without ever having access to the plaintext content.
+
+## Asymmetric Cryptography
+
+At the core, every client device generates an Ed25519 identity keypair upon registration. The public key is uploaded to the Server and serves as the device's cryptographic identity, while the private key never leaves the secure boundaries of the user's local browser storage (IndexedDB/localStorage).
+
+## The Key Distribution Flow
+
+To efficiently support both 1:1 Direct Messages and large Group Chats without an exponential blow-up of encrypted payloads, Nyx utilizes **Sender Keys**.
+
+### 1. Generating Sender Keys
+
+When a user joins a conversation, their client randomly generates a unique Symmetric Key (the "Sender Key") for that specific conversation. This key will be used to encrypt all messages they send into the chat.
+
+### 2. Distributing Sender Keys
+
+Before the user can send a message, they must securely share this Sender Key with everyone else in the room.
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant A as Alice's Client
+    participant API as Nyx Server
+    participant B as Bob's Client
+
+    A->>API: Request Bob's Public Identity Key
+    API-->>A: Returns Bob's Public Key
+    
+    A->>A: Encrypts Sender Key via ECDH against Bob's Public Key
+    
+    A->>API: Submits "Sender Key Distribution Bundle"
+    API->>B: Pushes Encrypted Bundle to Bob
+    
+    B->>B: Decrypts Bundle using Local Private Key
+    B->>B: Stores Alice's Sender Key for the Room`}
+/>
+
+### 3. Encrypting Messages
+
+Once keys are exchanged, the actual message payload is encrypted symmetrically. 
+
+1. Alice types "Hello!".
+2. Alice encrypts "Hello!" using her Sender Key.
+3. Alice sends the small ciphertext to the Server.
+4. The server routes the ciphertext to Bob.
+5. Bob receives the ciphertext, looks up Alice's Sender Key for the room, and decrypts the message.
+
+## Key Rotation and Revocation
+
+To maintain Forward Secrecy, sender keys are periodically rotated. If a user is removed from a group chat, all remaining users automatically discard their old Sender Keys and generate new ones, distributing them only to the currently authorized members. This ensures the removed user cannot decrypt future messages.

@@ -1,0 +1,31 @@
+---
+title: Background Workers
+description: Asynchronous tasks and cleanup jobs
+---
+
+# Background Workers
+
+To keep the primary API fast and responsive, tasks that do not need to block the HTTP/WebSocket response cycle are offloaded to background workers.
+
+## Types of Workers
+
+Nyx currently utilizes background processing for the following tasks:
+
+1. **Presence Pruning**: A periodic job that sweeps the Redis `conversationConnections` sets. It removes stale connection references (e.g., if a server node crashed and didn't gracefully close its sockets) and recalculates the `conversationUsers` online counts to ensure absolute accuracy.
+2. **Delivery Replays**: If a user connects to a room and has pending "Sent" messages that haven't been marked as "Delivered", a background routine fetches these from Postgres and re-emits them to the newly connected socket.
+
+## Implementation Details
+
+Workers are initialized during the main `Bun` application boot process (usually inside `src/main.ts` or triggered via `setInterval` in the `realtime.ts` bridge).
+
+Because Nyx runs in a distributed environment, care must be taken to ensure workers do not conflict:
+- **Stateless Jobs**: Tasks like Presence Pruning are safe to run concurrently across nodes because Redis operations (like `SREM` and `HINCRBY`) are atomic.
+- **Node-Specific Jobs**: Delivery replays are tied specifically to the node that currently holds the active WebSocket connection.
+
+<Mermaid
+  chart={`graph TD
+    Cron[Timer] -->|Tick| Prune(Prune Presence Job)
+    Prune -->|Fetch Stale Refs| Redis[(Redis)]
+    Prune -->|Calculate True Online Count| Redis
+    Redis -->|Emit userOffline| EventBus(Global Event Bus)`}
+/>

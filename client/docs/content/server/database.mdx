@@ -1,0 +1,35 @@
+---
+title: Database & ORM
+description: PostgreSQL and Drizzle ORM
+---
+
+# Database & ORM
+
+Nyx utilizes PostgreSQL for its persistent data store, accessed exclusively through **Drizzle ORM** for end-to-end type safety.
+
+## Database Design
+
+The database schema is defined in `server/src/platform/db/schema/index.ts`. Drizzle handles schema creation and migrations natively.
+
+### Core Tables
+1. **`users`**: Contains wallet addresses, display names, and profile pictures. No passwords or email addresses are stored.
+2. **`conversations`**: Represents both 1:1 Direct Messages and Group Chats.
+3. **`conversation_members`**: The join table associating users with conversations. Defines roles (admin, user) and tracks when a user was added or removed.
+4. **`messages`**: Stores the end-to-end encrypted ciphertexts. The server cannot read the `ciphertext` column.
+5. **`message_deliveries`**: Tracks the individual status (sent, delivered, read) of a message for every recipient in a conversation.
+
+## Drizzle ORM
+
+Drizzle was chosen for its zero-dependency runtime and native PostgreSQL support, resulting in high performance and excellent TypeScript integration.
+
+### Migrations
+Migrations are generated locally using `drizzle-kit` and applied during the application boot process or via a CI pipeline using `drizzle-orm/postgres-js/migrator`.
+
+<Mermaid
+  chart={`graph LR
+    Schema[schema.ts] -->|drizzle-kit generate| Migrations[0000_init.sql]
+    Migrations -->|drizzle-orm migrate| Postgres[(PostgreSQL)]`}
+/>
+
+### Connection Pooling
+The server utilizes a standard Postgres connection pool configured for high concurrency, appropriate for a heavily asynchronous WebSockets environment.

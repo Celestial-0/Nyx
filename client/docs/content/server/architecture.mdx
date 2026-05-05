@@ -1,0 +1,66 @@
+---
+title: System Architecture
+description: High-level overview of the Nyx distributed system
+---
+
+# System Architecture
+
+Nyx is designed to be a highly available, horizontally scalable chat system. It strictly separates transport (HTTP/WebSocket) from business logic, and uses Redis to bridge state across multiple server nodes.
+
+## High-Level Topology
+
+<Mermaid
+  chart={`graph TD
+    Client[Web Client<br/>React + Zustand] -->|HTTPS REST| API(Hono API Servers)
+    Client <-->|WSS Realtime| API
+    
+    subgraph Server Cluster
+        API --> DB[(PostgreSQL<br/>Drizzle ORM)]
+        API <-->|Pub/Sub & Presence| Redis[(Redis Cluster)]
+    end
+    
+    subgraph Cryptography
+        Client -->|Derives| LocalKeys[Local Key Store]
+        LocalKeys -->|Encrypts Payload| Client
+    end`}
+/>
+
+## The server (Hono + Bun)
+
+The server relies on the extremely fast **Bun** runtime and the **Hono** framework. 
+
+### Core Design Principles
+
+1. **Route vs Service Separation**: Hono controllers (`*.route.ts`) are purely for input validation (via `@hono/zod-openapi`) and HTTP response formatting. All heavy lifting is delegated to standalone services (`*.service.ts`).
+2. **Stateless HTTP, Stateful WebSockets**: Standard endpoints are completely stateless. WebSocket connections hold state (`ChatConnectionState`) in memory, but this state is synchronized globally via Redis.
+3. **Event-Driven Internals**: Core lifecycle events (like a user logging in, a message being saved, or a user joining a room) are dispatched via an internal `EventBus`. This decouples the core logic from secondary effects like realtime fanout or push notifications.
+
+### Internal Request Flow
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant C as Client
+    participant R as Route Handler (Hono)
+    participant S as Service Logic
+    participant DB as Postgres
+    participant E as EventBus
+    participant W as WebSocket/Redis
+
+    C->>R: POST /chat/messages
+    R->>R: Validate via Zod
+    R->>S: handleMessage()
+    S->>DB: Persist Encrypted Payload
+    S->>E: emit('chat:message:created')
+    E->>W: Fanout to Room Subscribers
+    W-->>C: Broadcast to Peers
+    S-->>R: Return Success
+    R-->>C: 200 OK`}
+/>
+
+## The Frontend (React + Web)
+
+The frontend is built for responsiveness. It operates on a **Local-First** philosophy.
+
+1. **Optimistic UI**: When a user sends a message, it is instantly rendered in the chat view with a "pending" state. The UI does not wait for a server round-trip.
+2. **State Machine**: The entire application state (conversations, messages, presence, typing indicators) is heavily managed by a global `Zustand` store (`chat.store.ts`), ensuring UI components remain thin and declarative.
+3. **Connection Resilience**: The websocket manager (`chat.ws.ts`) automatically handles connection drops, silent reconnections, and missed event reconciliation.

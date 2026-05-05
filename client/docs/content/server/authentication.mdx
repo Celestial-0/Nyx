@@ -1,0 +1,38 @@
+---
+title: Authentication
+description: Wallet-based Identity and Ed25519 Signatures
+---
+
+# Authentication
+
+Nyx discards the legacy email/password authentication model. Instead, it relies on cryptographic proof of ownership using Web3 wallets (e.g., Phantom, Solflare).
+
+## The Nonce Challenge Flow
+
+To securely authenticate a user, the Server challenges the client to sign a completely random, single-use string (a "nonce") using their wallet's private key.
+
+<Mermaid
+  chart={`sequenceDiagram
+    participant C as Client
+    participant W as Wallet Extension
+    participant API as Nyx Server
+    participant DB as Postgres
+
+    C->>API: POST /auth/nonce (walletAddress)
+    API->>DB: Store Nonce against Wallet
+    API-->>C: Return Nonce String
+    
+    C->>W: signMessage(Nonce)
+    W-->>C: Return Ed25519 Signature
+    
+    C->>API: POST /auth/verify (Signature, Wallet)
+    API->>API: Cryptographically Verify Signature using public wallet address
+    API->>DB: Upsert User Profile & Generate Session ID
+    API-->>C: Return JWT Access Token`}
+/>
+
+## Security Guarantees
+
+1. **No Passwords**: There is no password database to be breached.
+2. **Replay Attack Prevention**: The generated nonce is strictly single-use and has a very short expiration time (e.g., 5 minutes). Even if a malicious actor intercepts the signature, they cannot reuse it to log in later.
+3. **Stateless Tokens**: After verification, the Server issues a standard stateless JWT containing the `userId` and `sessionId`, which is then used to authenticate all subsequent HTTP and WebSocket requests.

@@ -1,0 +1,15 @@
+{
+  "title": "Server",
+  "pages": [
+    "architecture",
+    "authentication",
+    "realtime",
+    "e2ee",
+    "database",
+    "abuse-protection",
+    "events",
+    "workers",
+    "api",
+    "websocket-events"
+  ]
+}

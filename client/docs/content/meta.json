@@ -1,0 +1,8 @@
+{
+  "title": "Nyx Documentation",
+  "pages": [
+    "index",
+    "client",
+    "server"
+  ]
+}

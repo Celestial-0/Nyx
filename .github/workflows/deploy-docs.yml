@@ -1,0 +1,88 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'client/docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client/docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build docs
+        env:
+          BASE_PATH: /Nyx/
+        run: |
+          bun run build
+          
+          # Detect output directory
+          if [ -d .output/public ]; then
+            OUT_DIR=".output/public"
+          elif [ -d dist/client ]; then
+            OUT_DIR="dist/client"
+          else
+            echo "Error: No build output found"
+            exit 1
+          fi
+          echo "Output directory: $OUT_DIR"
+
+          # Ensure index.html exists
+          if [ ! -f "$OUT_DIR/index.html" ]; then
+            if [ -f "$OUT_DIR/_shell.html" ]; then
+              cp "$OUT_DIR/_shell.html" "$OUT_DIR/index.html"
+            else
+              echo "Error: Neither index.html nor _shell.html found"
+              exit 1
+            fi
+          fi
+
+          # Create 404.html and .nojekyll
+          cp "$OUT_DIR/index.html" "$OUT_DIR/404.html"
+          touch "$OUT_DIR/.nojekyll"
+
+          # Sync to .output/public if needed (for upload step)
+          if [ "$OUT_DIR" != ".output/public" ]; then
+            mkdir -p .output/public
+            cp -rn "$OUT_DIR"/* .output/public/
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./client/docs/.output/public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,110 @@
+---
+title: WebSocket Events
+description: Real-time protocols and WebSocket message framing
+---
+
+# WebSocket Protocol
+
+Once authenticated via the `/auth` endpoints, the client establishes a persistent connection to the real-time gateway at `/chat/ws`.
+
+## Connection Handshake
+- **URL**: `wss://api.nyx.chat/chat/ws?token=<JWT>&sharePresence=<boolean>`
+- The `sharePresence` boolean (default: true) determines whether the user will broadcast `presence:user:online` and `presence:user:offline` events to other peers.
+
+## Base Frame Format
+
+All messages sent over the WebSocket (both Client->Server and Server->Client) follow a strict JSON framing format.
+
+```json
+{
+  "type": "event:namespace:action",
+  "requestId": "uuid-v4-optional",
+  "data": { ... payload ... }
+}
+```
+
+The `requestId` is used by the client to correlate asynchronous server acknowledgements (like `chat:message:accepted` or `chat:message:rejected`) with their original outgoing request.
+
+## Client -> Server Commands
+
+### 1. Send Message
+```json
+{
+  "type": "chat:message:send",
+  "requestId": "client-gen-uuid",
+  "data": {
+    "messageId": "uuid-v4",
+    "conversationId": "uuid-v4",
+    "kind": "text",
+    "ciphertext": "base58_encoded_e2ee_payload",
+    "clientTimestamp": "2024-01-01T12:00:00Z"
+  }
+}
+```
+
+### 2. Acknowledge Delivery
+Used to mark a message as `delivered` or `read`.
+```json
+{
+  "type": "chat:delivery:ack",
+  "requestId": "client-gen-uuid",
+  "data": {
+    "messageId": "uuid-v4",
+    "conversationId": "uuid-v4",
+    "status": "read"
+  }
+}
+```
+
+### 3. Typing Indicators
+```json
+{
+  "type": "chat:typing:start", // or "chat:typing:stop"
+  "data": {
+    "conversationId": "uuid-v4"
+  }
+}
+```
+
+## Server -> Client Events
+
+### 1. Message Created
+Broadcast to all active subscribers in a conversation when a new message arrives.
+```json
+{
+  "type": "chat:message:created",
+  "data": {
+    "messageId": "uuid-v4",
+    "conversationId": "uuid-v4",
+    "senderId": "uuid-v4",
+    "ciphertext": "base58_encoded_e2ee_payload",
+    "createdAt": "2024-01-01T12:00:01Z"
+  }
+}
+```
+
+### 2. Delivery Updates
+Broadcast when a recipient acknowledges a message you sent.
+```json
+{
+  "type": "chat:delivery:updated",
+  "data": {
+    "messageId": "uuid-v4",
+    "conversationId": "uuid-v4",
+    "userId": "uuid-v4", // The user who read it
+    "status": "read"
+  }
+}
+```
+
+### 3. Presence Updates
+```json
+{
+  "type": "presence:user:online", // or "presence:user:offline"
+  "data": {
+    "userId": "uuid-v4",
+    "conversationId": "uuid-v4"
+  }
+}
+```
+*Note: Anonymous users (sharePresence=false) will not trigger these events when they connect.*

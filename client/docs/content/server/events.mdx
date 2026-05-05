@@ -1,0 +1,46 @@
+---
+title: Internal EventBus
+description: Decoupling business logic from secondary side-effects
+---
+
+# Internal EventBus
+
+Nyx utilizes a heavily typed, strictly validated internal `EventBus` to decouple primary business logic from secondary effects like WebSocket fanouts, push notifications, and background processing.
+
+## Why an EventBus?
+
+If the `chatService.handleMessage()` function had to directly call the WebSocket manager to loop through active connections and push messages, it would become bloated and hard to test.
+
+Instead, `chatService.handleMessage()` simply validates the message, saves it to PostgreSQL, and calls:
+`eventBus.emit(chatEventTopics.messageCreated, payload)`
+
+## Strongly Typed Schemas
+
+Every event payload is defined and validated using **Zod**.
+
+```typescript
+// schema.ts
+export const messageCreatedEventSchema = z.object({
+  messageId: z.string().uuid(),
+  conversationId: z.string().uuid(),
+  senderId: z.string().uuid(),
+  ciphertext: z.any(), // E2EE Payload
+  createdAt: z.string().datetime(),
+});
+```
+
+This schema is loaded into the `EventBus` registry during startup. If any service attempts to emit a `messageCreated` event with a missing or incorrectly formatted payload, the EventBus will throw a runtime error immediately, preventing silent failures.
+
+## Fanout Pipeline
+
+The most common subscriber to the `EventBus` is the `chatRealtimeBridge`. 
+
+<Mermaid
+  chart={`graph LR
+    Service[Service Logic] -->|Emits Typed Event| Bus[Local EventBus]
+    Bus -->|Listens| Realtime[Realtime Bridge]
+    Realtime -->|Serializes| Redis[(Redis Pub/Sub)]
+    Realtime -->|Delivers| LocalSockets[Local Connected Clients]`}
+/>
+
+By decoupling these layers, we can easily add new subscribers in the future—for instance, an APNS/FCM Push Notification worker—without ever touching the core message-handling logic.

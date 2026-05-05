@@ -1,0 +1,23 @@
+---
+title: Nyx Documentation
+description: Decentralized, Real-Time, End-to-End Encrypted Chat
+---
+
+# Introduction to Nyx
+
+Nyx is a modern, privacy-first decentralized chat application designed to offer a seamless, real-time communication experience. Built on a cutting-edge stack utilizing **Bun**, **Hono**, **React**, and **WebSockets**, Nyx drops traditional email/password authentication in favor of blockchain-based cryptographic wallet authentication.
+
+## Core Pillars
+
+1. **Absolute Privacy**: All direct and group conversations are end-to-end encrypted. The server routes encrypted payloads and has zero knowledge of the message contents.
+2. **Wallet Authentication**: Identity is proven through ed25519 cryptographic signatures using a Solana/crypto wallet. There are no passwords to leak.
+3. **Real-Time Presence**: An optimized Redis-backed presence engine ensures you always know when your peers are online, typing, or have read your messages.
+4. **Local-First Experience**: The frontend utilizes aggressive caching and optimistic UI updates to provide a 0-latency feel, backed by a robust state machine in Zustand.
+
+## Technology Stack
+
+- **Client**: React, Vite, Zustand, TailwindCSS, Framer Motion, Radix UI.
+- **Server**: Bun, Hono, Drizzle ORM (PostgreSQL), Redis (Pub/Sub & Presence), WebSockets.
+- **Cryptography**: `tweetnacl` for ed25519 signature verification and `libsignal` inspired Double Ratchet / Sender Key derivations for E2EE.
+
+Use the sidebar to explore the deep dives into the system architecture, real-time engine, and encryption implementations.

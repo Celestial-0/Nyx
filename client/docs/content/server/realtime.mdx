@@ -1,0 +1,57 @@
+---
+title: Real-Time & Presence
+description: How WebSocket communication and user presence scaling works
+---
+
+# Real-Time Engine
+
+The core of Nyx's real-time experience is its highly optimized WebSocket infrastructure, designed to handle thousands of concurrent connections distributed across multiple server nodes.
+
+## The Problem with Websockets
+
+WebSockets are strictly bound to a single server instance. If User A connects to Node 1, and User B connects to Node 2, they cannot directly communicate. Nyx solves this using a **Redis Pub/Sub Fanout Architecture**.
+
+<Mermaid
+  chart={`graph TD
+    UserA((User A)) <-->|WS| Node1[API Node 1]
+    UserB((User B)) <-->|WS| Node2[API Node 2]
+    
+    Node1 <-->|Pub/Sub| Redis[(Redis Cluster)]
+    Node2 <-->|Pub/Sub| Redis
+    
+    Node1 -->|Syncs Presence| Redis
+    Node2 -->|Syncs Presence| Redis`}
+/>
+
+## Internal Event Fanout
+
+When an action occurs (e.g., a message is sent or a user starts typing), the following sequence guarantees exact-once delivery across the distributed system:
+
+1. **Local Emission**: The service emits an event to the local node's `EventBus`.
+2. **Local Delivery**: The `EventBus` listener looks up locally connected WebSockets that are subscribed to the specific `conversationId`.
+3. **Remote Fanout**: The `chatRealtimeBridge` captures the event, wraps it in a routing envelope, and publishes it to Redis via Pub/Sub.
+4. **Remote Delivery**: Other nodes receive the Redis message, unwrap it, and deliver it to their locally connected WebSockets.
+
+> [!NOTE]
+> To prevent message reflection (echoing), the originating node ignores its own published Redis events via a `nodeId` check.
+
+## Presence Tracking (Online / Offline)
+
+Accurately tracking who is online requires synchronizing state across multiple devices and tabs.
+
+### Multi-Device Anomaly
+
+If a user has Nyx open in two browser tabs, they have two active WebSocket connections. If they close one tab, they should **not** appear offline, as the other tab is still active.
+
+### The Solution: Redis Hashing
+
+Nyx utilizes Redis Sets and Hashes to maintain precise presence counters:
+1. **`conversationConnections` (Set)**: Tracks every unique `connectionId` currently bound to a conversation.
+2. **`conversationUsers` (Hash)**: Maps a `userId` to the number of active connections they have in that conversation.
+
+When a user connects, their connection count increments. We only emit a `presence:user:online` event when the count goes from `0 -> 1` (Newly Joined).
+When a user disconnects, the count decrements. We only emit a `presence:user:offline` event when the count reaches `0` (Fully Disconnected).
+
+### Anonymity Mode (Ghost Mode)
+
+Users can toggle "Share presence" in their client settings. If disabled, the frontend sends a `sharePresence=false` query parameter during the WebSocket handshake. The server then entirely bypasses the `conversationUsers` tracking logic for that connection, ensuring no online/offline events are emitted, while still allowing the user to view others' presence.
