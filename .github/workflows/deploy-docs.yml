@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - 'client/docs/**'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:
@@ -14,69 +15,90 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./client/docs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Generate Fumadocs source
+        working-directory: ./client/docs
+        run: bunx fumadocs-mdx
 
       - name: Build docs
+        working-directory: ./client/docs
         env:
-          BASE_PATH: /Nyx/
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Required: tells staticFunctionMiddleware WHERE to write pre-baked
+          # JSON cache files during prerender (dist/client/__tsr/staticServerFnCache/<hash>.json).
+          # Without this, client-side navigation fetches /__tsr/staticServerFnCache/<hash>.json
+          # which doesn't exist → GitHub Pages returns 404.html (HTML) → .json() crashes.
+          TSS_CLIENT_OUTPUT_DIR: dist/client
         run: |
           bun run build
-          
-          # Detect output directory
-          if [ -d .output/public ]; then
-            OUT_DIR=".output/public"
-          elif [ -d dist/client ]; then
-            OUT_DIR="dist/client"
-          else
-            echo "Error: No build output found"
-            exit 1
-          fi
-          echo "Output directory: $OUT_DIR"
 
-          # Ensure index.html exists
+          OUT_DIR="dist/client"
+
+          echo "--- Build output (top level) ---"
+          ls -la "$OUT_DIR" || true
+
+          echo "--- Prerendered HTML files ---"
+          find "$OUT_DIR" -name "*.html" | head -50
+
+          echo "--- Static server function cache files (__tsr/staticServerFnCache/) ---"
+          find "$OUT_DIR" -path "*/__tsr/*" | head -30 || echo "(none found - TSS_CLIENT_OUTPUT_DIR may not have worked)"
+
+          # TanStack Start SPA mode: look for index.html or _shell.html
           if [ ! -f "$OUT_DIR/index.html" ]; then
             if [ -f "$OUT_DIR/_shell.html" ]; then
+              echo "Using _shell.html as index.html"
               cp "$OUT_DIR/_shell.html" "$OUT_DIR/index.html"
             else
-              echo "Error: Neither index.html nor _shell.html found"
+              echo "Error: no index.html or _shell.html found in $OUT_DIR"
+              echo "All files:"
+              find "$OUT_DIR" -maxdepth 3 -type f | head -60
               exit 1
             fi
           fi
 
-          # Create 404.html and .nojekyll
+          # SPA fallback: copy index.html as 404.html so client-side nav works on GitHub Pages
+          # (GitHub Pages serves 404.html for any missing path, letting React Router handle it)
           cp "$OUT_DIR/index.html" "$OUT_DIR/404.html"
+
+          # Prevent Jekyll processing of underscore-prefixed files (__tsr, _shell, etc.)
           touch "$OUT_DIR/.nojekyll"
 
-          # Sync to .output/public if needed (for upload step)
-          if [ "$OUT_DIR" != ".output/public" ]; then
-            mkdir -p .output/public
-            cp -rn "$OUT_DIR"/* .output/public/
-          fi
+          echo "--- Final output ---"
+          ls -la "$OUT_DIR"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./client/docs/.output/public
+          path: ./client/docs/dist/client
 
   deploy:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
