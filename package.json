@@ -8,7 +8,7 @@
   "type": "module",
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.9.9",
+    "turbo": "^2.9.16",
     "@types/bun": "latest"
   },
   "scripts": {

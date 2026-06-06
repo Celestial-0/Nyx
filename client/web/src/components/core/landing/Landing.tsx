@@ -6,8 +6,8 @@ export function Landing() {
   return (
     <>
       <Background />
-      {import.meta.env.DEV && <LandingHeader />}
-      {import.meta.env.PROD && <Waitlist />}
+      <LandingHeader />
+      {import.meta.env.DEV && <Waitlist />}
     </>
   )
 }
