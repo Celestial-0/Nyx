@@ -1,0 +1,15 @@
+name: nyx
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: nyx-server
+    restart: unless-stopped
+    ports:
+      - "${PORT:-5000}:${PORT:-5000}"
+    command: sh -c "bun run db:migrate && bun run src/main.ts"
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

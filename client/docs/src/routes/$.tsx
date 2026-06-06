@@ -81,10 +81,14 @@ const clientLoader = browserCollections.docs.createClientLoader({
 
 function Page() {
   const { pageTree, path, markdownUrl } = useFumadocsLoader(Route.useLoaderData());
+  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
+  const routerRelativeMarkdownUrl = basePath && markdownUrl.startsWith(basePath)
+    ? markdownUrl.slice(basePath.length)
+    : markdownUrl;
 
   return (
     <DocsLayout {...baseOptions()} tree={pageTree} sidebar={{ defaultOpenLevel: 1 }}>
-      <Link to={markdownUrl} hidden />
+      <Link to={routerRelativeMarkdownUrl} hidden />
       <Suspense>{clientLoader.useContent(path, { markdownUrl, path })}</Suspense>
     </DocsLayout>
   );

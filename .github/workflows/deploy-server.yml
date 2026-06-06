@@ -1,0 +1,54 @@
+name: Deploy Backend Server to EC2
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - 'server/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: "deploy-server"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            set -e
+
+            echo "Starting deployment to EC2..."
+            
+            # Verify project directory exists
+            if [ ! -d "${{ secrets.EC2_PROJECT_PATH }}" ]; then
+              echo "Error: Project directory ${{ secrets.EC2_PROJECT_PATH }} does not exist on EC2 instance."
+              exit 1
+            fi
+
+            cd ${{ secrets.EC2_PROJECT_PATH }}
+            
+            echo "Fetching latest changes..."
+            git fetch origin main
+            
+            echo "Resetting to origin/main..."
+            git reset --hard origin/main
+
+
+
+            echo "Building and launching containers via Docker Compose..."
+            docker compose up -d --build --remove-orphans
+
+            echo "Cleaning up unused Docker images..."
+            docker image prune -f
+
+            echo "Deployment completed successfully!"
