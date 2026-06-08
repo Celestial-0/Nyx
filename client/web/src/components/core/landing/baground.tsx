@@ -2,13 +2,20 @@ import { FlickeringGrid } from "@/components/ui/flickering-grid"
 
 export const Background = () => {
   return (
-    <FlickeringGrid
-      className="fixed inset-0 -z-10"
-      squareSize={4}
-      gridGap={6}
-      color="#6B7280"
-      maxOpacity={0.5}
-      flickerChance={0.1}
-    />
+    <div className="fixed inset-0 -z-10 bg-background">
+      <FlickeringGrid
+        className="absolute inset-0 opacity-[0.25]"
+        squareSize={4}
+        gridGap={8}
+        color="var(--accent-brand)"
+        maxOpacity={0.15}
+        flickerChance={0.08}
+      />
+      {/* Ambient radial glows */}
+      <div className="pointer-events-none absolute inset-0 glow-primary opacity-[0.06] dark:opacity-[0.09]" />
+      <div className="pointer-events-none absolute inset-0 glow-accent opacity-[0.04] dark:opacity-[0.06]" />
+      {/* Dynamic vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,var(--background)_90%)]" />
+    </div>
   )
 }

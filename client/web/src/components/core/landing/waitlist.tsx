@@ -151,19 +151,9 @@ export function Waitlist() {
     })
 
     return (
-        <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden px-4 py-16">
-
-            {/* Ambient glow */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <motion.div
-                    className="absolute top-1/4 left-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]"
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                />
-            </div>
-
+        <div className="relative flex w-full items-center justify-center py-6">
             <motion.section
-                className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center gap-8 text-center"
+                className="relative z-10 mx-auto flex w-full max-w-lg flex-col items-center gap-6 text-center"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"

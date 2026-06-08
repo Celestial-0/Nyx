@@ -34,11 +34,16 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       if (typeof window === "undefined") {
         return `rgba(0, 0, 0,`
       }
+      let resolvedColor = color;
+      if (color.startsWith("var(")) {
+        const varName = color.slice(4, -1).trim();
+        resolvedColor = getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "rgb(0, 0, 0)";
+      }
       const canvas = document.createElement("canvas")
       canvas.width = canvas.height = 1
       const ctx = canvas.getContext("2d")
       if (!ctx) return "rgba(255, 0, 0,"
-      ctx.fillStyle = color
+      ctx.fillStyle = resolvedColor;
       ctx.fillRect(0, 0, 1, 1)
       const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data)
       return `rgba(${r}, ${g}, ${b},`
