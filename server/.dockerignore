@@ -1,0 +1,10 @@
+# Exclude env files — variables are injected by Docker Compose from the root .env
+.env
+.env.*
+
+# Exclude dev/tooling artifacts
+node_modules
+.turbo
+.gitignore
+README.md
+docs
