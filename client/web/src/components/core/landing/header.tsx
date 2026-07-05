@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { useWallet } from "@solana/wallet-adapter-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { WalletAuth } from "@/components/core/auth/WalletAuth"
 import { useLogout } from "@/features/auth/auth.hooks"
@@ -81,35 +81,18 @@ export function LandingHeader() {
             </span>
           </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-8 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            <a
-              href="#features"
-              className="transition-colors hover:text-foreground cursor-pointer"
-            >
-              Features
-            </a>
-            <a
-              href="#terminal"
-              className="transition-colors hover:text-foreground cursor-pointer"
-            >
-              Terminal
-            </a>
-            <a
-              href="#micropayments"
-              className="transition-colors hover:text-foreground cursor-pointer"
-            >
-              Governance
-            </a>
-            <a
-              href="#faq"
-              className="transition-colors hover:text-foreground cursor-pointer"
-            >
-              FAQ
-            </a>
-          </div>
-
           <div className="flex items-center gap-4">
+            <a
+              href="https://celestial-0.github.io/Nyx/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({
+                variant: "outline",
+                className: "h-8 px-4 text-xs font-bold uppercase tracking-wider",
+              })}
+            >
+              Docs
+            </a>
 
             {/* Theme Toggle Button */}
             <button
