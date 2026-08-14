@@ -75,46 +75,46 @@ export function PaymentsRechargeCard({
   )
 
   return (
-    <Card className="rounded-3xl border border-border/70 bg-card/70 backdrop-blur-xl">
-      <CardHeader className="border-b border-border/60 pb-4">
-        <CardTitle>Recharge</CardTitle>
-        <CardDescription>
+    <Card className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl">
+      <CardHeader className="border-b border-border/50 px-4 py-3">
+        <CardTitle className="text-sm font-semibold">Recharge</CardTitle>
+        <CardDescription className="text-xs">
           Send native SOL to the treasury wallet, then verify the signature.
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 pt-4">
+      <CardContent className="flex flex-col gap-3 p-3.5">
         {recoveryMessage ? (
-          <Alert className="rounded-2xl border-border/60 bg-background/35">
-            <HugeiconsIcon icon={Rocket01Icon} strokeWidth={1.8} />
-            <AlertTitle>Credits needed</AlertTitle>
-            <AlertDescription>{recoveryMessage}</AlertDescription>
+          <Alert className="rounded-xl border-border/60 bg-background/35 py-2">
+            <HugeiconsIcon icon={Rocket01Icon} strokeWidth={1.8} className="size-4" />
+            <AlertTitle className="text-xs font-medium">Credits needed</AlertTitle>
+            <AlertDescription className="text-xs">{recoveryMessage}</AlertDescription>
           </Alert>
         ) : null}
 
         {successMessage ? (
-          <Alert className="rounded-2xl border-border/60 bg-background/35">
-            <HugeiconsIcon icon={Rocket01Icon} strokeWidth={1.8} />
-            <AlertTitle>Recharge confirmed</AlertTitle>
-            <AlertDescription>{successMessage}</AlertDescription>
+          <Alert className="rounded-xl border-border/60 bg-background/35 py-2">
+            <HugeiconsIcon icon={Rocket01Icon} strokeWidth={1.8} className="size-4" />
+            <AlertTitle className="text-xs font-medium">Recharge confirmed</AlertTitle>
+            <AlertDescription className="text-xs">{successMessage}</AlertDescription>
           </Alert>
         ) : null}
 
         {error ? (
           <Alert
             variant="destructive"
-            className="rounded-2xl border-destructive/30"
+            className="rounded-xl border-destructive/30 py-2"
           >
-            <AlertTitle>Unable to recharge</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertTitle className="text-xs font-medium">Unable to recharge</AlertTitle>
+            <AlertDescription className="text-xs">{error}</AlertDescription>
           </Alert>
         ) : null}
 
-        <FieldGroup>
-          <Field>
+        <FieldGroup className="gap-3">
+          <Field className="gap-1.5">
             <FieldContent>
-              <FieldTitle>Preset amount</FieldTitle>
-              <FieldDescription>
+              <FieldTitle className="text-xs font-medium">Preset amount</FieldTitle>
+              <FieldDescription className="text-[0.7rem]">
                 Pick a quick amount or enter a custom SOL value below.
               </FieldDescription>
             </FieldContent>
@@ -131,82 +131,74 @@ export function PaymentsRechargeCard({
               spacing={1}
             >
               {presets.map((preset) => (
-                <ToggleGroupItem key={preset} value={preset}>
+                <ToggleGroupItem key={preset} value={preset} className="h-8 px-2.5 text-xs">
                   {preset} SOL
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
           </Field>
 
-          <Field>
+          <Field className="gap-1.5">
             <FieldContent>
-              <FieldTitle>Custom amount</FieldTitle>
-              <FieldDescription>
-                Up to 9 decimals. Credits are integer-based on verification.
-              </FieldDescription>
+              <FieldTitle className="text-xs font-medium">Custom amount</FieldTitle>
             </FieldContent>
             <Input
               inputMode="decimal"
               placeholder="0.25"
               value={amount}
+              className="h-8 text-xs"
               onChange={(event) => onAmountChange(event.target.value)}
             />
           </Field>
         </FieldGroup>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
-            <p className="text-xs text-muted-foreground">Estimated credits</p>
-            <p className="mt-1 text-sm font-medium">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl border border-border/50 bg-background/35 p-2.5">
+            <p className="text-[0.7rem] text-muted-foreground">Estimated credits</p>
+            <p className="mt-0.5 text-xs font-medium">
               {estimatedCredits.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-background/35 p-3">
-            <p className="text-xs text-muted-foreground">Wallet destination</p>
-            <p className="mt-1 truncate text-sm font-medium">
-              {snapshot.treasury.walletAddress}
+          <div className="rounded-xl border border-border/50 bg-background/35 p-2.5">
+            <p className="text-[0.7rem] text-muted-foreground">Network</p>
+            <p className="mt-0.5 truncate text-xs font-medium capitalize">
+              {snapshot.network.chain}
             </p>
           </div>
         </div>
 
         <Separator />
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Treasury wallet</span>
-            <Button type="button" variant="outline" size="sm" onClick={onCopyTreasury}>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs text-muted-foreground">Treasury wallet</span>
+            <Button type="button" variant="outline" size="xs" onClick={onCopyTreasury} className="h-6 px-2 text-[0.7rem]">
               <HugeiconsIcon
                 icon={Copy01Icon}
                 strokeWidth={1.8}
                 data-icon="inline-start"
+                className="size-3"
               />
               Copy
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-background/35 px-3 py-2">
-            <p className="truncate font-mono text-xs text-muted-foreground">
+          <div className="rounded-xl border border-border/50 bg-background/35 px-2.5 py-1.5">
+            <p className="truncate font-mono text-[0.7rem] text-muted-foreground">
               {snapshot.treasury.walletAddress}
             </p>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-muted-foreground">Network</span>
-            <Badge variant="outline">
-              {snapshot.network.chain} / {snapshot.network.commitment}
-            </Badge>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="border-t border-border/60 pt-4">
+      <CardFooter className="border-t border-border/50 px-4 py-3">
         <Button
           type="button"
-          className="w-full rounded-2xl"
+          className="h-9 w-full rounded-xl text-xs font-medium"
           disabled={disabled || isBusy}
           onClick={onRecharge}
         >
-          {isBusy ? <Spinner data-icon="inline-start" /> : null}
+          {isBusy ? <Spinner data-icon="inline-start" className="size-3.5" /> : null}
           Send SOL and verify
         </Button>
       </CardFooter>

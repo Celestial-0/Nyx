@@ -5,13 +5,6 @@ import { HugeiconsIcon } from "@hugeicons/react"
 
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   Drawer,
   DrawerContent,
   DrawerDescription,
@@ -29,10 +22,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { useResponsivePanels } from "@/hooks/useResponsivePanels"
 import type { UserConfig } from "@/features/user/user.types"
 
-type SettingsSheetProps = {
+export type SettingsDrawerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   config: UserConfig
@@ -43,7 +35,7 @@ type SettingsSheetProps = {
   onSignOut: () => Promise<void> | void
 }
 
-export function SettingsSheet({
+export function SettingsDrawer({
   open,
   onOpenChange,
   config,
@@ -52,11 +44,9 @@ export function SettingsSheet({
   onConfigChange,
   onOpenPayments,
   onSignOut,
-}: SettingsSheetProps) {
-  const { isMobile } = useResponsivePanels()
-
+}: SettingsDrawerProps) {
   const content = (
-    <ScrollArea className="max-h-[min(70vh,720px)]">
+    <ScrollArea className="max-h-[min(70vh,680px)]">
       <div className="flex flex-col gap-6 p-6">
         <FieldGroup>
           <Field>
@@ -203,33 +193,20 @@ export function SettingsSheet({
     </ScrollArea>
   )
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Settings</DrawerTitle>
-            <DrawerDescription>
-              Personalize your chat workspace and session behavior.
-            </DrawerDescription>
-          </DrawerHeader>
-          {content}
-        </DrawerContent>
-      </Drawer>
-    )
-  }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg overflow-hidden rounded-3xl border border-border/70 bg-popover/95 p-0">
-        <DialogHeader className="border-b border-border/60 px-6 py-5 text-left">
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="mx-auto max-w-lg rounded-t-3xl border-t border-border/70 bg-popover/95 backdrop-blur-xl p-0">
+        <DrawerHeader className="border-b border-border/60 px-6 py-5 text-left">
+          <DrawerTitle className="text-base font-semibold">Settings</DrawerTitle>
+          <DrawerDescription>
             Personalize your chat workspace and session behavior.
-          </DialogDescription>
-        </DialogHeader>
+          </DrawerDescription>
+        </DrawerHeader>
         {content}
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   )
 }
+
+export const SettingsSheet = SettingsDrawer
+export type SettingsSheetProps = SettingsDrawerProps

@@ -8,7 +8,6 @@ import {
   Rocket01Icon,
 } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
-import { motion } from "motion/react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -21,6 +20,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 const statusClassNames = {
@@ -57,6 +61,7 @@ export type SidebarProfileProps = {
   target?: React.ComponentProps<"a">["target"]
   rel?: React.ComponentProps<"a">["rel"]
   menuItems?: SidebarProfileMenuItem[] | null
+  expanded?: boolean
 } & Omit<
   React.ComponentProps<typeof Button>,
   "children" | "variant" | "size" | "render" | "nativeButton"
@@ -82,6 +87,7 @@ export function SidebarProfile({
   menuItems,
   className,
   title,
+  expanded = false,
   ...props
 }: SidebarProfileProps) {
   const fallback = initials ?? getInitials(name)
@@ -111,26 +117,24 @@ export function SidebarProfile({
 
   const items = menuItems ?? defaultMenuItems
   const profileClassName = cn(
-    "relative flex h-12 w-full items-center justify-center gap-0 overflow-hidden rounded-2xl p-0 lg:group-hover/sidebar:justify-start lg:group-hover/sidebar:gap-3 lg:group-focus-within/sidebar:justify-start lg:group-focus-within/sidebar:gap-3",
-    "bg-background/60 backdrop-blur-md",
-    "transition-all duration-200",
-    "hover:bg-muted/40",
-    "active:scale-[0.97]",
-    "focus-visible:ring-2 focus-visible:ring-primary/20",
+    "relative flex items-center rounded-2xl border border-transparent bg-background/50 backdrop-blur-md transition-all duration-150 hover:bg-secondary/80 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/20",
+    expanded ? "h-12 w-full justify-start gap-3 px-3" : "size-12 justify-center p-0 mx-auto",
     className
   )
 
   const content = (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className="flex w-full items-center justify-center gap-0 overflow-hidden px-0 lg:group-hover/sidebar:justify-start lg:group-hover/sidebar:gap-3 lg:group-hover/sidebar:px-3 lg:group-focus-within/sidebar:justify-start lg:group-focus-within/sidebar:gap-3 lg:group-focus-within/sidebar:px-3"
+    <div
+      className={cn(
+        "flex w-full items-center overflow-hidden",
+        expanded ? "justify-start gap-3" : "justify-center"
+      )}
     >
       <div className="relative shrink-0">
-        <Avatar className="after:border-transparent">
+        <Avatar className="size-9 after:border-transparent">
           <AvatarImage src={imageSrc} alt={name} />
-          <AvatarFallback className="text-xs font-medium">{fallback}</AvatarFallback>
+          <AvatarFallback className="text-xs font-medium">
+            {fallback}
+          </AvatarFallback>
         </Avatar>
 
         <span
@@ -141,49 +145,62 @@ export function SidebarProfile({
         />
       </div>
 
-      <div className="w-0 overflow-hidden opacity-0 transition-all duration-200 lg:group-hover/sidebar:w-auto lg:group-hover/sidebar:opacity-100 lg:group-focus-within/sidebar:w-auto lg:group-focus-within/sidebar:opacity-100">
-        <p className="truncate text-sm font-medium text-foreground">{name}</p>
-        <p className="text-xs text-muted-foreground">{statusLabels[status]}</p>
-      </div>
+      {expanded && (
+        <div className="min-w-0 flex-1 text-left">
+          <p className="truncate text-sm font-medium text-foreground">{name}</p>
+          <p className="truncate text-[0.7rem] text-muted-foreground">
+            {statusLabels[status]}
+          </p>
+        </div>
+      )}
 
       <span className="sr-only">{profileTitle}</span>
-    </motion.div>
+    </div>
   )
 
-  const triggerContent = (
-    <>
+  const triggerButton = (
+    <DropdownMenuTrigger
+      render={
+        <Button
+          variant="ghost"
+          size={expanded ? "default" : "icon-lg"}
+          className={profileClassName}
+          aria-label={profileTitle}
+          {...props}
+        />
+      }
+    >
       {content}
-      <span className="sr-only">{profileTitle}</span>
-    </>
+    </DropdownMenuTrigger>
   )
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="ghost" size="icon-lg" className={profileClassName} />
-        }
-        aria-label={profileTitle}
-        title={profileTitle}
-        {...props}
-      >
-        {triggerContent}
-      </DropdownMenuTrigger>
+      {expanded ? (
+        triggerButton
+      ) : (
+        <Tooltip>
+          <TooltipTrigger render={triggerButton} />
+          <TooltipContent side="right" sideOffset={12}>
+            {profileTitle}
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       <DropdownMenuContent
-        align="center"
+        align={expanded ? "start" : "center"}
         side="top"
         sideOffset={8}
         className={cn(
-          "w-52 rounded-xl",
+          "w-56 rounded-2xl",
           "border border-border/50 bg-background/95 backdrop-blur-xl",
-          "shadow-lg p-1"
+          "shadow-lg p-1.5"
         )}
       >
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="px-2 py-2">
-            <div className="flex items-center gap-2.5">
-              <Avatar className="size-7 after:border-transparent">
+          <DropdownMenuLabel className="px-2.5 py-2">
+            <div className="flex items-center gap-3">
+              <Avatar className="size-8 after:border-transparent">
                 <AvatarImage src={imageSrc} />
                 <AvatarFallback>{fallback}</AvatarFallback>
               </Avatar>
@@ -212,7 +229,7 @@ export function SidebarProfile({
               disabled={item.disabled}
               onClick={item.onSelect}
               className={cn(
-                "rounded-md px-2 py-1.5 text-sm",
+                "rounded-xl px-2.5 py-2 text-sm",
                 "transition-colors duration-150",
                 "hover:bg-muted/50"
               )}
@@ -222,12 +239,12 @@ export function SidebarProfile({
                 ) : undefined
               }
             >
-              <span className="flex w-full items-center gap-2">
+              <span className="flex w-full items-center gap-2.5">
                 {item.icon && (
                   <HugeiconsIcon
                     icon={item.icon}
                     strokeWidth={1.8}
-                    className="text-muted-foreground"
+                    className="text-muted-foreground size-4.5"
                   />
                 )}
                 <span className="flex-1">{item.label}</span>

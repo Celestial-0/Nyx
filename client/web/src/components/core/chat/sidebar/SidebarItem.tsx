@@ -4,6 +4,11 @@ import * as React from "react"
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 export type SidebarItemProps = Omit<
@@ -16,6 +21,7 @@ export type SidebarItemProps = Omit<
   href?: string
   target?: React.ComponentProps<"a">["target"]
   rel?: React.ComponentProps<"a">["rel"]
+  expanded?: boolean
 }
 
 export function SidebarItem({
@@ -27,74 +33,99 @@ export function SidebarItem({
   rel,
   className,
   title,
+  expanded = false,
   ...props
 }: SidebarItemProps) {
   const itemClassName = cn(
-    "flex h-12 w-full items-center justify-center gap-0 overflow-hidden rounded-2xl border border-transparent bg-transparent p-0 text-muted-foreground transition-all duration-200 hover:bg-secondary/80 hover:text-foreground focus-visible:bg-secondary/80 focus-visible:text-foreground lg:group-hover/sidebar:justify-start lg:group-hover/sidebar:gap-3 lg:group-hover/sidebar:px-3 lg:group-focus-within/sidebar:justify-start lg:group-focus-within/sidebar:gap-3 lg:group-focus-within/sidebar:px-3 data-[active=true]:border-border/60 data-[active=true]:bg-secondary/90 data-[active=true]:text-foreground",
+    "flex items-center rounded-2xl border border-transparent bg-transparent transition-all duration-150 hover:bg-muted/40 hover:text-foreground focus-visible:bg-muted/40 focus-visible:text-foreground",
+    active ? "text-foreground font-semibold" : "text-muted-foreground",
+    expanded ? "h-12 w-full justify-start gap-3.5 px-3.5" : "size-12 justify-center p-0 mx-auto",
     className
   )
 
   const iconNode = (
     <HugeiconsIcon
       icon={icon}
-      strokeWidth={active ? 2.2 : 2}
-      className="shrink-0"
+      strokeWidth={active ? 2.4 : 1.8}
+      className={cn(
+        "size-5.5 shrink-0 transition-all duration-150",
+        active
+          ? "text-foreground scale-110 drop-shadow-xs"
+          : "text-muted-foreground hover:text-foreground"
+      )}
     />
   )
   const itemTitle = title ?? label
 
-  if (href) {
-    const itemRel = target === "_blank" && !rel ? "noreferrer noopener" : rel
-
-    return (
-      <Button
-        variant="ghost"
-        size="icon-lg"
-        nativeButton={false}
-        render={<a href={href} rel={itemRel} target={target} />}
-        aria-current={active ? "page" : undefined}
-        aria-label={label}
-        data-active={active}
-        title={itemTitle}
-        className={itemClassName}
-        {...props}
-      >
-        {iconNode}
-        <span
-          className={cn(
-            "pointer-events-none w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 lg:group-hover/sidebar:w-auto lg:group-hover/sidebar:opacity-100 lg:group-focus-within/sidebar:w-auto lg:group-focus-within/sidebar:opacity-100",
-            active && "text-foreground"
-          )}
-        >
-          {label}
-        </span>
-        <span className="sr-only">{label}</span>
-      </Button>
-    )
-  }
-
-  return (
+  const buttonElement = href ? (
     <Button
-      type="button"
       variant="ghost"
-      size="icon-lg"
-      aria-pressed={active}
+      size={expanded ? "default" : "icon-lg"}
+      nativeButton={false}
+      render={
+        <a
+          href={href}
+          rel={target === "_blank" && !rel ? "noreferrer noopener" : rel}
+          target={target}
+        />
+      }
+      aria-current={active ? "page" : undefined}
       aria-label={label}
       data-active={active}
-      title={itemTitle}
       className={itemClassName}
       {...props}
     >
       {iconNode}
-      <span
-        className={cn(
-          "pointer-events-none w-0 overflow-hidden whitespace-nowrap text-sm font-medium opacity-0 transition-all duration-200 lg:group-hover/sidebar:w-auto lg:group-hover/sidebar:opacity-100 lg:group-focus-within/sidebar:w-auto lg:group-focus-within/sidebar:opacity-100",
-          active && "text-foreground"
-        )}
-      >
-        {label}
-      </span>
-      <span className="sr-only">{label}</span>
+      {expanded ? (
+        <span
+          className={cn(
+            "truncate text-sm font-medium",
+            active && "font-semibold text-foreground"
+          )}
+        >
+          {label}
+        </span>
+      ) : (
+        <span className="sr-only">{label}</span>
+      )}
     </Button>
+  ) : (
+    <Button
+      type="button"
+      variant="ghost"
+      size={expanded ? "default" : "icon-lg"}
+      aria-pressed={active}
+      aria-label={label}
+      data-active={active}
+      className={itemClassName}
+      {...props}
+    >
+      {iconNode}
+      {expanded ? (
+        <span
+          className={cn(
+            "truncate text-sm font-medium",
+            active && "font-semibold text-foreground"
+          )}
+        >
+          {label}
+        </span>
+      ) : (
+        <span className="sr-only">{label}</span>
+      )}
+    </Button>
+  )
+
+  if (expanded) {
+    return buttonElement
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={buttonElement} />
+      <TooltipContent side="right" sideOffset={12}>
+        {itemTitle}
+      </TooltipContent>
+    </Tooltip>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Message02Icon } from "@hugeicons/core-free-icons"
+import { Message02Icon, Shield01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { motion } from "motion/react"
 
@@ -26,6 +26,7 @@ type MessageListProps = {
   hasOlderMessages: boolean
   isLoadingOlder: boolean
   error: string | null
+  peerOnline?: boolean | null
   onLoadOlderMessages: () => void
   onHideMessage: (message: ChatMessage) => void
   onDeleteMessage: (message: ChatMessage) => void
@@ -40,6 +41,7 @@ export function MessageList({
   hasOlderMessages,
   isLoadingOlder,
   error,
+  peerOnline,
   onLoadOlderMessages,
   onHideMessage,
   onDeleteMessage,
@@ -98,7 +100,7 @@ export function MessageList({
           Array.from({ length: 4 }, (_, index) => (
             <div key={`message-skeleton-${index}`} className="flex gap-3">
               <Skeleton className="mt-1 size-8 rounded-full" />
-              <div className="flex max-w-[min(38rem,100%)] flex-1 flex-col gap-2">
+              <div className="flex max-w-xl flex-1 flex-col gap-2">
                 <Skeleton className="h-3 w-24" />
                 <Skeleton className="h-24 w-full rounded-3xl" />
               </div>
@@ -115,23 +117,47 @@ export function MessageList({
             </EmptyHeader>
           </Empty>
         ) : messages.length ? (
-          messages.map((message) => {
-            const isOwn = message.senderId === currentUserId
-            const sender =
-              membersById[message.senderId] ??
-              (isOwn ? fallbackSelfMember : fallbackUnknownMember)
+          <>
+            {!hasOlderMessages && (
+              <div className="mx-auto my-2 flex max-w-md items-center justify-center gap-2 rounded-xl border border-border/40 bg-card/40 px-3.5 py-2 text-center text-[0.7rem] text-muted-foreground backdrop-blur-sm select-none">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="13"
+                  height="13"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-3.5 shrink-0 text-emerald-500 dark:text-emerald-400"
+                >
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>
+                  Messages are end-to-end encrypted. Only members of this chat have keys to read them.
+                </span>
+              </div>
+            )}
+            {messages.map((message) => {
+              const isOwn = message.senderId === currentUserId
+              const sender =
+                membersById[message.senderId] ??
+                (isOwn ? fallbackSelfMember : fallbackUnknownMember)
 
-            return (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                sender={sender}
-                isOwn={isOwn}
-                onHideMessage={onHideMessage}
-                onDeleteMessage={onDeleteMessage}
-              />
-            )
-          })
+              return (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  sender={sender}
+                  isOwn={isOwn}
+                  peerOnline={peerOnline}
+                  onHideMessage={onHideMessage}
+                  onDeleteMessage={onDeleteMessage}
+                />
+              )
+            })}
+          </>
         ) : (
           <Empty className="min-h-80 border border-dashed border-border/70">
             <EmptyHeader>

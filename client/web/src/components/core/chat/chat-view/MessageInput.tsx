@@ -64,7 +64,7 @@ export function MessageInput({
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={onBlur}
-            placeholder={disabled ? "Message unavailable" : "Message"}
+            placeholder={disabled ? "Message unavailable" : "Send an encrypted message..."}
             disabled={disabled}
             className="min-h-24 border-0 bg-transparent px-2 py-2 shadow-none focus-visible:ring-0"
           />

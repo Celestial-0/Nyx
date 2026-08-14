@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/empty"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 import { Button } from "@/components/ui/button"
 import type { ContactEntry } from "@/features/contacts/contacts.types"
 
@@ -60,7 +60,7 @@ function getContactSubLabel(contact: ContactEntry) {
   return getShortWallet(contact.user.walletAddress)
 }
 
-type ContactsSheetProps = {
+export type ContactsDrawerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   contacts: ContactEntry[]
@@ -70,21 +70,21 @@ type ContactsSheetProps = {
   }) => Promise<void> | void
 }
 
-export function ContactsSheet({
+export function ContactsDrawer({
   open,
   onOpenChange,
   contacts,
   onOpenConversation,
-}: ContactsSheetProps) {
+}: ContactsDrawerProps) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full max-w-sm p-0">
-        <SheetHeader className="border-b border-border/60 px-6 py-5 text-left">
-          <SheetTitle>Contacts</SheetTitle>
-          <SheetDescription>
+    <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="left">
+      <DrawerContent className="h-full w-full max-w-sm p-0 rounded-none sm:rounded-r-2xl border-r border-border/60 bg-background/95 backdrop-blur-xl">
+        <DrawerHeader className="border-b border-border/60 px-6 py-5 text-left">
+          <DrawerTitle className="text-base font-semibold">Contacts</DrawerTitle>
+          <DrawerDescription>
             Saved people and quick conversation access.
-          </SheetDescription>
-        </SheetHeader>
+          </DrawerDescription>
+        </DrawerHeader>
 
         <ScrollArea className="h-[calc(100%-88px)]">
           <div className="flex flex-col gap-3 p-4">
@@ -147,7 +147,10 @@ export function ContactsSheet({
             )}
           </div>
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   )
 }
+
+export const ContactsSheet = ContactsDrawer
+export type ContactsSheetProps = ContactsDrawerProps

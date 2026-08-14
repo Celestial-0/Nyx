@@ -18,7 +18,12 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useResponsivePanels } from "@/hooks/useResponsivePanels"
 import { useAuthStore } from "@/features/auth/auth.store"
@@ -146,13 +151,13 @@ export function PaymentsDialog() {
   }
 
   const content = (
-    <ScrollArea className="max-h-[min(80vh,840px)]">
-      <div className="flex flex-col gap-4 p-6">
+    <ScrollArea className="max-h-[min(72vh,580px)]">
+      <div className="flex flex-col gap-4 p-4 sm:p-5">
         {status === "loading" && !snapshot ? (
-          <Empty className="rounded-3xl border border-dashed border-border/70 bg-card/60">
+          <Empty className="rounded-2xl border border-dashed border-border/60 bg-card/40 py-8">
             <EmptyHeader>
-              <EmptyTitle>Loading credits</EmptyTitle>
-              <EmptyDescription>
+              <EmptyTitle className="text-sm font-medium">Loading credits</EmptyTitle>
+              <EmptyDescription className="text-xs">
                 Pulling your balance and recharge history.
               </EmptyDescription>
             </EmptyHeader>
@@ -160,10 +165,12 @@ export function PaymentsDialog() {
         ) : null}
 
         {status === "error" && !snapshot ? (
-          <Empty className="rounded-3xl border border-dashed border-border/70 bg-card/60">
+          <Empty className="rounded-2xl border border-dashed border-border/60 bg-card/40 py-8">
             <EmptyHeader>
-              <EmptyTitle>Credits unavailable</EmptyTitle>
-              <EmptyDescription>
+              <EmptyTitle className="text-sm font-medium text-destructive">
+                Credits unavailable
+              </EmptyTitle>
+              <EmptyDescription className="text-xs">
                 {error ?? "Unable to load your current balance."}
               </EmptyDescription>
             </EmptyHeader>
@@ -207,10 +214,10 @@ export function PaymentsDialog() {
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={(open) => !open && close()}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Credits</DrawerTitle>
-            <DrawerDescription>
+        <DrawerContent className="mx-auto max-w-lg rounded-t-3xl border-t border-border/70 bg-popover/95 backdrop-blur-xl p-0">
+          <DrawerHeader className="border-b border-border/60 px-5 py-4 text-left">
+            <DrawerTitle className="text-base font-semibold">Credits</DrawerTitle>
+            <DrawerDescription className="text-xs">
               Recharge your balance without leaving the chat workspace.
             </DrawerDescription>
           </DrawerHeader>
@@ -222,10 +229,10 @@ export function PaymentsDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-      <DialogContent className="sm:max-w-[min(96vw,90rem)] overflow-hidden rounded-[2rem] border border-border/70 bg-popover/95 p-0">
-        <DialogHeader className="border-b border-border/60 px-6 py-5 text-left">
-          <DialogTitle>Credits</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-md md:max-w-lg overflow-hidden rounded-3xl border border-border/70 bg-popover/95 backdrop-blur-xl p-0 shadow-2xl">
+        <DialogHeader className="border-b border-border/60 px-5 py-4 text-left">
+          <DialogTitle className="text-base font-semibold">Credits</DialogTitle>
+          <DialogDescription className="text-xs">
             Recharge your balance without leaving the chat workspace.
           </DialogDescription>
         </DialogHeader>

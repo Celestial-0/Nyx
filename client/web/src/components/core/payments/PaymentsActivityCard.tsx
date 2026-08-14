@@ -69,22 +69,22 @@ export function PaymentsActivityCard({
   const hasActivity = snapshot.recentActivity.length > 0
 
   return (
-    <Card className="rounded-3xl border border-border/70 bg-card/70 backdrop-blur-xl">
-      <CardHeader className="border-b border-border/60 pb-4">
-        <CardTitle>Recent activity</CardTitle>
-        <CardDescription>
+    <Card className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl">
+      <CardHeader className="border-b border-border/50 px-4 py-3">
+        <CardTitle className="text-sm font-semibold">Recent activity</CardTitle>
+        <CardDescription className="text-xs">
           Your latest top-ups and credit changes sync here.
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3">
+      <CardContent className="p-3.5">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-medium text-muted-foreground">
                 Recharges
               </p>
               {hasRecharges ? (
-                <Badge variant="outline">
+                <Badge variant="outline" className="text-[0.65rem] px-1.5 py-0">
                   {snapshot.recentRecharges.length}
                 </Badge>
               ) : null}
@@ -94,32 +94,32 @@ export function PaymentsActivityCard({
               snapshot.recentRecharges.map((recharge) => (
                 <div
                   key={recharge.id}
-                  className="flex items-start justify-between gap-4 rounded-2xl border border-border/60 bg-background/35 p-3"
+                  className="flex items-start justify-between gap-3 rounded-xl border border-border/50 bg-background/35 p-2.5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
+                    <p className="truncate text-xs font-medium">
                       {recharge.amountSol} SOL
                     </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {recharge.transactionHash.slice(0, 8)}...
-                      {recharge.transactionHash.slice(-8)}
+                    <p className="truncate text-[0.7rem] text-muted-foreground">
+                      {recharge.transactionHash.slice(0, 6)}...
+                      {recharge.transactionHash.slice(-6)}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <Badge variant="secondary">
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
                       +{recharge.creditsGranted}
                     </Badge>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-[0.65rem] text-muted-foreground">
                       {formatWhen(recharge.verifiedAt ?? recharge.createdAt)}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <Empty className="rounded-2xl border border-dashed border-border/60 bg-background/25">
+              <Empty className="rounded-xl border border-dashed border-border/50 bg-background/20 py-3">
                 <EmptyHeader>
-                  <EmptyTitle>No recharges yet</EmptyTitle>
-                  <EmptyDescription>
+                  <EmptyTitle className="text-xs font-medium">No recharges yet</EmptyTitle>
+                  <EmptyDescription className="text-[0.7rem]">
                     Your completed SOL top-ups will appear here.
                   </EmptyDescription>
                 </EmptyHeader>
@@ -129,34 +129,37 @@ export function PaymentsActivityCard({
 
           <Separator />
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs font-medium text-muted-foreground">
                 Credit ledger
               </p>
               {hasActivity ? (
-                <Badge variant="outline">{snapshot.recentActivity.length}</Badge>
+                <Badge variant="outline" className="text-[0.65rem] px-1.5 py-0">
+                  {snapshot.recentActivity.length}
+                </Badge>
               ) : null}
             </div>
 
             {hasActivity ? (
-              <ScrollArea className="max-h-64 pr-2">
-                <div className="flex flex-col gap-3">
+              <ScrollArea className="max-h-48 pr-2">
+                <div className="flex flex-col gap-2">
                   {snapshot.recentActivity.map((activity) => (
                     <div
                       key={activity.id}
-                      className="flex items-start justify-between gap-4 rounded-2xl border border-border/60 bg-background/35 p-3"
+                      className="flex items-start justify-between gap-3 rounded-xl border border-border/50 bg-background/35 p-2.5"
                     >
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <p className="truncate text-xs font-medium">
                           {formatReason(activity.reason)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-[0.7rem] text-muted-foreground">
                           {formatWhen(activity.createdAt)}
                         </p>
                       </div>
                       <Badge
                         variant={activity.change >= 0 ? "secondary" : "outline"}
+                        className="text-xs px-1.5 py-0"
                       >
                         {activity.change > 0 ? "+" : ""}
                         {activity.change}
@@ -166,11 +169,11 @@ export function PaymentsActivityCard({
                 </div>
               </ScrollArea>
             ) : (
-              <Empty className="rounded-2xl border border-dashed border-border/60 bg-background/25">
+              <Empty className="rounded-xl border border-dashed border-border/50 bg-background/20 py-3">
                 <EmptyContent>
                   <EmptyHeader>
-                    <EmptyTitle>No spend activity yet</EmptyTitle>
-                    <EmptyDescription>
+                    <EmptyTitle className="text-xs font-medium">No spend activity yet</EmptyTitle>
+                    <EmptyDescription className="text-[0.7rem]">
                       Message and room charges will show up after you use them.
                     </EmptyDescription>
                   </EmptyHeader>

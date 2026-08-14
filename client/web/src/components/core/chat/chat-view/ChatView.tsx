@@ -1,4 +1,4 @@
-import { BadgeInfoIcon, Menu01Icon } from "@hugeicons/core-free-icons"
+import { BadgeInfoIcon, Menu01Icon, Shield01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { motion } from "motion/react"
 
@@ -12,6 +12,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type {
   ChatConversation,
   ChatConversationContext,
@@ -161,9 +166,33 @@ export function ChatView({
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="hidden sm:inline-flex">
-            Encrypted
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <div className="hidden cursor-default items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-500 dark:text-emerald-400 sm:inline-flex">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="13"
+                    height="13"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="size-3.5 shrink-0"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <span>E2EE</span>
+                </div>
+              }
+            />
+            <TooltipContent side="bottom" sideOffset={6}>
+              End-to-end encrypted · verified with cryptographic device keys
+            </TooltipContent>
+          </Tooltip>
+
           <Badge variant="outline">
             {conversation.type === "group"
               ? `${members.length} members`
@@ -202,6 +231,7 @@ export function ChatView({
         hasOlderMessages={hasOlderMessages}
         isLoadingOlder={isLoadingOlder}
         error={error}
+        peerOnline={peerOnline}
         onLoadOlderMessages={onLoadOlderMessages}
         onHideMessage={onHideMessage}
         onDeleteMessage={onDeleteMessage}

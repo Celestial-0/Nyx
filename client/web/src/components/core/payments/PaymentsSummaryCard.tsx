@@ -25,29 +25,31 @@ export function PaymentsSummaryCard({
   snapshot,
 }: PaymentsSummaryCardProps) {
   return (
-    <Card className="rounded-3xl border border-border/70 bg-card/70 backdrop-blur-xl">
-      <CardHeader className="border-b border-border/60 pb-4">
-        <div className="flex flex-col gap-1">
-          <CardTitle>Balance</CardTitle>
-          <CardDescription>
+    <Card className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl">
+      <CardHeader className="border-b border-border/50 px-4 py-3">
+        <div className="flex flex-col gap-0.5">
+          <CardTitle className="text-sm font-semibold">Balance</CardTitle>
+          <CardDescription className="text-xs">
             Your message spend and recharge rate live here.
           </CardDescription>
         </div>
         <CardAction>
-          <Badge variant="secondary">{formatCredits(snapshot.balance)}</Badge>
+          <Badge variant="secondary" className="px-2 py-0.5 text-xs font-semibold">
+            {formatCredits(snapshot.balance)}
+          </Badge>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 pt-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-            <p className="text-xs text-muted-foreground">Recharge rate</p>
-            <p className="mt-1 text-sm font-medium">
+      <CardContent className="flex flex-col gap-3 p-3.5">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl border border-border/50 bg-background/40 p-2.5">
+            <p className="text-[0.7rem] text-muted-foreground">Recharge rate</p>
+            <p className="mt-0.5 text-xs font-medium">
               {snapshot.pricing.creditsPerSol.toLocaleString()} / SOL
             </p>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-            <p className="text-xs text-muted-foreground">Starter balance</p>
-            <p className="mt-1 text-sm font-medium">
+          <div className="rounded-xl border border-border/50 bg-background/40 p-2.5">
+            <p className="text-[0.7rem] text-muted-foreground">Starter balance</p>
+            <p className="mt-0.5 text-xs font-medium">
               {formatCredits(snapshot.pricing.defaultInitialCredits)}
             </p>
           </div>
@@ -55,18 +57,18 @@ export function PaymentsSummaryCard({
 
         <Separator />
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col gap-1.5 text-xs">
+          <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Message send</span>
-            <span>{snapshot.pricing.messageSendCredits} credits</span>
+            <span className="font-medium">{snapshot.pricing.messageSendCredits} credits</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Create group</span>
-            <span>{snapshot.pricing.groupRoomCreateCredits} credits</span>
+            <span className="font-medium">{snapshot.pricing.groupRoomCreateCredits} credits</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-3">
             <span className="text-muted-foreground">Network</span>
-            <span className="capitalize">{snapshot.network.chain}</span>
+            <span className="capitalize font-medium">{snapshot.network.chain}</span>
           </div>
         </div>
       </CardContent>

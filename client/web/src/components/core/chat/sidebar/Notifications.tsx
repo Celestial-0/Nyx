@@ -11,31 +11,31 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
 
-type NotificationsSheetProps = {
+export type NotificationsDrawerProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-export function NotificationsSheet({
+export function NotificationsDrawer({
   open,
   onOpenChange,
-}: NotificationsSheetProps) {
+}: NotificationsDrawerProps) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full max-w-sm p-0">
-        <SheetHeader className="border-b border-border/60 px-6 py-5 text-left">
-          <SheetTitle>Notifications</SheetTitle>
-          <SheetDescription>
+    <Drawer open={open} onOpenChange={onOpenChange} swipeDirection="left">
+      <DrawerContent className="h-full w-full max-w-sm p-0 rounded-none sm:rounded-r-2xl border-r border-border/60 bg-background/95 backdrop-blur-xl">
+        <DrawerHeader className="border-b border-border/60 px-6 py-5 text-left">
+          <DrawerTitle className="text-base font-semibold">Notifications</DrawerTitle>
+          <DrawerDescription>
             Recent activity and conversation updates.
-          </SheetDescription>
-        </SheetHeader>
+          </DrawerDescription>
+        </DrawerHeader>
 
         <div className="p-6">
           <Empty className="border border-dashed border-border/60 bg-card/30">
@@ -50,7 +50,10 @@ export function NotificationsSheet({
             </EmptyHeader>
           </Empty>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   )
 }
+
+export const NotificationsSheet = NotificationsDrawer
+export type NotificationsSheetProps = NotificationsDrawerProps
