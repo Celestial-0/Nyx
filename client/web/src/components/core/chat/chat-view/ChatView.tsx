@@ -1,4 +1,4 @@
-import { BadgeInfoIcon, Menu01Icon, Shield01Icon } from "@hugeicons/core-free-icons"
+import { BadgeInfoIcon, Menu01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { motion } from "motion/react"
 

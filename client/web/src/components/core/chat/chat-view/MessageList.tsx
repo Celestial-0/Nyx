@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Message02Icon, Shield01Icon } from "@hugeicons/core-free-icons"
+import { Message02Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { motion } from "motion/react"
 

@@ -14,35 +14,45 @@ interface Message {
   timestamp: string
 }
 
+function getInitialTimeString(offsetSeconds = 0): string {
+  const d = new Date(Date.now() - offsetSeconds * 1000)
+  return d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+}
+
 export function TerminalSimulator() {
   // --- Terminal Simulator State ---
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<Message[]>(() => [
     {
       id: "1",
       sender: "system",
-      text: "NYX NETWORK INITIALIZED. STANDBY...",
+      text: "NYX PROTOCOL INITIALIZED. SOLANA ED25519 READY.",
       cipherText: "SYSTEM BOOT",
       isEncrypting: false,
       isDecrypting: false,
-      timestamp: "10:42:01",
+      timestamp: getInitialTimeString(6),
     },
     {
       id: "2",
       sender: "system",
-      text: "ESTABLISHING ECDH KEY EXCHANGE WITH PEER [node_x9a8f]...",
+      text: "X25519 / AES-256-GCM KEY EXCHANGE WITH PEER [node_x9a8f]...",
       cipherText: "KEY_EXCHANGE",
       isEncrypting: false,
       isDecrypting: false,
-      timestamp: "10:42:02",
+      timestamp: getInitialTimeString(4),
     },
     {
       id: "3",
       sender: "peer",
-      text: "Connection established. Are you ready for the leak?",
-      cipherText: "Connection established. Are you ready for the leak?",
+      text: "E2EE session established. Ephemeral channel active with node_x9a8f.",
+      cipherText: "E2EE session established. Ephemeral channel active with node_x9a8f.",
       isEncrypting: false,
       isDecrypting: false,
-      timestamp: "10:42:05",
+      timestamp: getInitialTimeString(1),
     },
   ])
   const [inputText, setInputText] = useState("")
@@ -176,10 +186,10 @@ export function TerminalSimulator() {
     // Simulate response from Peer after a short delay
     setTimeout(async () => {
       const responses = [
-        "Received. File hash verified on Solana ledger.",
-        "Understood. Moving conversations to room #zero-day.",
-        "No metadata logs found on the node. We are clear.",
-        "Solana micropayment received. Room session validated.",
+        "Payload received. Ciphertext verified via Solana Ed25519 proof.",
+        "Session acknowledged. Ephemeral packet routed through Bun relay mesh.",
+        "Zero metadata logged on node. Shared secret handshake valid.",
+        "Solana micropayment received. Room participant token authorized.",
       ]
       const randomResponse = responses[Math.floor(Math.random() * responses.length)]
       await simulateEncryption(randomResponse, "peer")

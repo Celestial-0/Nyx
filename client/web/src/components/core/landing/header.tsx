@@ -8,6 +8,8 @@ import { useLogout } from "@/features/auth/auth.hooks"
 import { useAuthStore } from "@/features/auth/auth.store"
 import { useUserStore } from "@/features/user/user.store"
 
+import { GitHubStarButton } from "@/components/core/landing/GitHubStarButton"
+
 export function LandingHeader() {
   const navigate = useNavigate()
   const { disconnect, publicKey, connected } = useWallet()
@@ -81,7 +83,9 @@ export function LandingHeader() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <GitHubStarButton variant="header" />
+
             <a
               href="https://celestial-0.github.io/Nyx/"
               target="_blank"

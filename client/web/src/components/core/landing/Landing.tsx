@@ -5,6 +5,7 @@ import { Background } from "@/components/core/landing/baground"
 import { Terminal, TypingAnimation, AnimatedSpan } from "@/components/ui/terminal"
 import { AnimatedBeam } from "@/components/ui/animated-beam"
 import { LandingHeader } from "@/components/core/landing/header"
+import { GitHubStarButton } from "@/components/core/landing/GitHubStarButton"
 import { TerminalSimulator } from "./TerminalSimulator"
 import { WalletAuth } from "@/components/core/auth/WalletAuth"
 import { motion, AnimatePresence } from "framer-motion"
@@ -18,19 +19,19 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "How does Nyx authenticate users anonymously?",
-    answer: "Nyx uses your Solana wallet's public address as your unique identifier. When logging in, you sign an ephemeral cryptographic message (nonce) in your browser. This proves wallet ownership and authorizes your session without requiring emails, passwords, phone numbers, or profiling database entries.",
+    answer: "Nyx uses your Solana wallet's public address as your unique identifier. When signing in, you sign an ephemeral cryptographic message (nonce) in your browser. This verifies wallet ownership via Ed25519 cryptographic proofs and authorizes your session without requiring emails, passwords, phone numbers, or profiling entries.",
   },
   {
     question: "Are my chat messages stored on a server database?",
-    answer: "No. All messages are encrypted end-to-end (E2EE) in your browser using AES-256-GCM before they are sent. The payload is distributed via an event-driven mesh of Redis Pub/Sub cache streams. There are no relational databases storing chat history or logs on our servers.",
+    answer: "No. All messages are encrypted end-to-end (E2EE) in your browser using AES-256-GCM before transmission. Ephemeral message packets are routed strictly through an in-memory Redis Pub/Sub event mesh and Bun WebSockets. PostgreSQL and Drizzle ORM are used solely for wallet session validation, room metadata, and access controls—never for plaintext chat content.",
   },
   {
     question: "Why does Nyx use Solana micro-payments?",
-    answer: "Traditional chats use Captchas or phone numbers to prevent bot spam, which compromises privacy. Nyx introduces a micro-SOL payment requirement for creating or entering public rooms. This creates a hard financial threshold that bankrupted botnets while remaining negligible (fractions of a penny) for human users.",
+    answer: "Traditional chats use Captchas or phone numbers to prevent bot spam, which compromises privacy. Nyx introduces a micro-SOL payment requirement for creating or entering public rooms. This creates a hard financial threshold that neutralizes botnets while remaining negligible (fractions of a cent) for human users.",
   },
   {
     question: "Is the cryptography audited and open-source?",
-    answer: "Yes. Nyx's philosophy is rooted in trustless verification and open-source software. All cryptographic operations (ECDH key exchange and AES encryption) are performed client-side using industry-standard Web Crypto APIs, allowing complete transparency and auditability.",
+    answer: "Yes. Nyx's codebase is fully open-source on GitHub under the MIT license. All cryptographic operations (ECDH/X25519 key exchange, Ed25519 wallet nonces, and AES-256-GCM encryption) are executed client-side using industry-standard Web Crypto and TweetNaCl APIs.",
   },
 ]
 
@@ -191,10 +192,13 @@ export function Landing() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-accent-brand/35 bg-accent-brand/5 px-4 py-1.5 text-xs text-accent-brand uppercase font-bold tracking-widest mb-6"
+            className="flex flex-wrap items-center justify-center gap-3 mb-6"
           >
-            <span className="size-1.5 rounded-full bg-accent-brand text-secondary animate-ping" />
-            Decentralized anonymous chat
+            <GitHubStarButton variant="hero" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1 text-xs text-muted-foreground uppercase font-mono tracking-widest backdrop-blur-md">
+              <span className="size-1.5 rounded-full bg-success animate-pulse" />
+              Solana E2EE Mesh
+            </div>
           </motion.div>
 
           <motion.h1
@@ -221,7 +225,7 @@ export function Landing() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-xs text-muted-foreground mt-6 max-w-lg leading-[1.7]"
           >
-            Eliminate traditional accounts. Connect with Solana wallet addresses, exchange messages secured with ephemeral browser-level keys, and bypass centralized databases.
+            Eliminate traditional accounts. Connect with Solana wallet addresses, exchange messages secured with ephemeral browser-level keys, and bypass centralized message logs.
           </motion.p>
 
           <motion.div
@@ -241,6 +245,17 @@ export function Landing() {
               className="rounded-lg border border-border hover:border-accent-brand/45 hover:bg-muted/40 bg-card text-foreground font-semibold text-xs px-6 py-3 uppercase tracking-widest transition-all cursor-pointer hover:-translate-y-px"
             >
               Inspect Terminal
+            </a>
+            <a
+              href="https://github.com/Celestial-0/Nyx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-border/80 hover:border-accent-brand/40 hover:bg-muted/30 bg-card/50 text-muted-foreground hover:text-foreground font-semibold text-xs px-5 py-3 uppercase tracking-widest transition-all inline-flex items-center gap-2"
+            >
+              <svg className="size-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              GitHub
             </a>
           </motion.div>
 
@@ -288,10 +303,10 @@ export function Landing() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
                 </span>
-                RELAY METHOD
+                BACKEND & RELAY
               </span>
               <span className="text-xs font-semibold text-foreground tracking-wider uppercase block font-mono">
-                Redis PubSub Mesh
+                Bun + Hono + Redis
               </span>
             </div>
 
@@ -301,10 +316,10 @@ export function Landing() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-warning opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-warning"></span>
                 </span>
-                DB RETENTION
+                DATA STORAGE
               </span>
               <span className="text-xs font-semibold text-destructive tracking-wider uppercase block font-mono">
-                Zero Persistent Logs
+                Zero Chat Logs (E2EE)
               </span>
             </div>
           </motion.div>
@@ -356,13 +371,13 @@ export function Landing() {
                   Zero-Knowledge Transmission
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Message contents are encrypted with key pairs computed client-side. Our relays receive and route bytes without having access to the shared secret keys, ensuring that even if servers are seized or targeted, your logs remain indecipherable.
+                  Message contents are encrypted with key pairs computed client-side using TweetNaCl and Web Crypto. Our relays receive and route bytes without access to shared secret keys, ensuring full zero-knowledge privacy.
                 </p>
               </div>
               <div className="space-y-4 pt-2">
                 <LiveHexMatrix />
                 <div className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex justify-between items-center">
-                  <span>Protocol: AES-GCM + Diffie-Hellman</span>
+                  <span>Protocol: AES-256-GCM + X25519 ECDH</span>
                   <span className="text-success font-bold flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-success" />
                     STATUS: ACTIVE
@@ -381,16 +396,16 @@ export function Landing() {
                   </svg>
                 </div>
                 <h3 className="font-heading text-sm font-bold uppercase text-foreground">
-                  Decoupled Profile
+                  Decoupled Identity
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  No usernames, emails, or phone registration. Your public Solana key serves as your network node address. No user-profiles are indexed.
+                  No usernames, emails, or password stores. Solana Ed25519 cryptographic signatures verify your session without persistent user profiling.
                 </p>
               </div>
               <div className="space-y-4 pt-2">
                 <WalletIDVisual />
                 <div className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex justify-between items-center">
-                  <span>Adapter: Web3 adapter</span>
+                  <span>Adapter: Solana Wallet Adapter</span>
                   <span className="text-success font-bold">ANONYMOUS</span>
                 </div>
               </div>
@@ -411,13 +426,13 @@ export function Landing() {
                   Anti-Sybil Micro-gating
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Creating group channels requires minor SOL transactions. This economic shield protects against flood attacks while maintaining public censorship-resistant access.
+                  Creating group channels requires minor SOL transactions on Solana. This economic shield neutralizes botnet attacks while preserving open, censorship-resistant access.
                 </p>
               </div>
               <div className="space-y-4 pt-2">
                 <LedgerTicker />
                 <div className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex justify-between items-center">
-                  <span>Network: Solana Mainnet</span>
+                  <span>Network: Solana Ledger</span>
                   <span className="text-accent-brand font-bold">SOL_PAY</span>
                 </div>
               </div>
@@ -432,16 +447,16 @@ export function Landing() {
                   </svg>
                 </div>
                 <h3 className="font-heading text-sm font-bold uppercase text-foreground">
-                  High-Throughput Socket Mesh
+                  High-Throughput Relay Mesh
                 </h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Powered by Bun, Hono, and Redis pub/sub memory buses. Message events are broadcasted to socket peers within milliseconds, optimizing latency for instant anonymous communications.
+                  Built on Bun, Hono, and Redis pub/sub memory buses. Message events are broadcasted to socket peers with sub-20ms latency and zero persistent message logging.
                 </p>
               </div>
               <div className="space-y-4 pt-2">
                 <NodeMapVisual />
                 <div className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider flex justify-between items-center">
-                  <span>Relay: Bun + Redis PubSub</span>
+                  <span>Relay: Bun + Hono + Redis PubSub</span>
                   <span className="text-success font-bold">LATENCY &lt; 20MS</span>
                 </div>
               </div>
@@ -460,7 +475,7 @@ export function Landing() {
               Packet Routing Journey
             </h2>
             <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Trace the secure life-cycle of a communication block from raw entry to remote peer reception.
+              Trace the lifecycle of an encrypted communication packet from local origin to remote peer.
             </p>
           </div>
 
@@ -496,9 +511,9 @@ export function Landing() {
                   <div className="font-bold text-[10px] font-mono text-accent-brand bg-accent-brand/10 rounded px-2 py-0.5">STEP_01</div>
                   <span className="text-[9px] text-muted-foreground font-mono">LOCAL_CLIENT</span>
                 </div>
-                <h4 className="font-bold text-xs uppercase text-foreground">Key Generation</h4>
+                <h4 className="font-bold text-xs uppercase text-foreground">In-Browser Encryption</h4>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Ephemeral encryption keys are calculated in-browser using Web Crypto APIs. Text is locked with AES-GCM.
+                  Ephemeral key pairs are calculated in-browser with Web Crypto & TweetNaCl. Content is sealed using AES-256-GCM.
                 </p>
               </div>
             </div>
@@ -512,7 +527,7 @@ export function Landing() {
                 </div>
                 <h4 className="font-bold text-xs uppercase text-foreground">Redis Memory Mesh</h4>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Encrypted payload enters Bun socket relays and is published to Redis pub/sub memory queues. No DB logs.
+                  Encrypted payload enters Bun socket relays and is published to Redis pub/sub streams. Zero plaintext DB storage.
                 </p>
               </div>
             </div>
@@ -524,9 +539,9 @@ export function Landing() {
                   <div className="font-bold text-[10px] font-mono text-accent-brand bg-accent-brand/10 rounded px-2 py-0.5">STEP_03</div>
                   <span className="text-[9px] text-muted-foreground font-mono">REMOTE_PEER</span>
                 </div>
-                <h4 className="font-bold text-xs uppercase text-foreground">Peer Handshake</h4>
+                <h4 className="font-bold text-xs uppercase text-foreground">Client-Side Decryption</h4>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Recipient client retrieves ciphertext, validates authenticity, and decrypts content locally in sandbox memory.
+                  Recipient peer receives ciphertext, verifies authenticity proof, and decrypts content locally in sandbox memory.
                 </p>
               </div>
             </div>
@@ -554,30 +569,30 @@ export function Landing() {
                 &gt; nyx init --wallet=solana
               </TypingAnimation>
               <AnimatedSpan delay={200} className="text-muted-foreground font-semibold">
-                [sys] wallet connected: H8xW9...3bZfQ
+                [sys] wallet connected: 8xW9...3bZfQ
               </AnimatedSpan>
               <AnimatedSpan delay={150} className="text-success font-bold">
-                [sys] proof verified. session issued.
+                [sys] ed25519 proof verified. session issued.
               </AnimatedSpan>
             
               <TypingAnimation delay={400} className="text-warning font-bold">
-                &gt; nyx join #zero-day
+                &gt; nyx join #general-mesh
               </TypingAnimation>
               <AnimatedSpan delay={200} className="text-muted-foreground font-semibold">
-                [sys] fee confirmed: 0.001 SOL
+                [sys] micro-fee confirmed: 0.001 SOL
               </AnimatedSpan>
               <AnimatedSpan delay={150} className="text-success font-bold">
-                [sys] encrypted channel established.
+                [sys] e2ee room channel established.
               </AnimatedSpan>
             
               <TypingAnimation delay={300} className="text-warning font-bold">
-                &gt; nyx send "leak complete"
+                &gt; nyx send --e2ee "Confidential payload"
               </TypingAnimation>
               <AnimatedSpan delay={100} className="text-accent-brand font-bold">
-                [E2EE] ciphertext generated
+                [E2EE] aes-256-gcm ciphertext generated
               </AnimatedSpan>
               <AnimatedSpan delay={100} className="text-success font-bold">
-                [sys] delivered via pubsub • 24ms
+                [sys] delivered via redis mesh • 18ms
               </AnimatedSpan>
             </Terminal>
           </div>
@@ -634,17 +649,24 @@ export function Landing() {
         </section>
 
         {/* FOOTER */}
-        <footer className="border-t border-border pt-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-muted-foreground">
+        <footer className="border-t border-border pt-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] text-muted-foreground font-mono">
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            <span>Nyx Network — Cryptographic Protocol</span>
+            <span>Nyx Network — Decentralized Anonymous Chat</span>
           </div>
-          <div className="flex gap-6">
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors">
-              Source Code
+          <div className="flex flex-wrap items-center gap-5">
+            <GitHubStarButton variant="footer" />
+            <span className="text-border">|</span>
+            <a
+              href="https://celestial-0.github.io/Nyx/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground transition-colors"
+            >
+              Documentation
             </a>
             <span className="text-border">|</span>
-            <span className="uppercase">Censorship-Resistant, Open-Source</span>
+            <span className="uppercase text-muted-foreground/80">MIT Open Source</span>
           </div>
         </footer>
       </main>
