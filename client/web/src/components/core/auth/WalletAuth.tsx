@@ -179,8 +179,9 @@ export function WalletAuth({ open, onOpenChange, onSignedIn }: Props) {
         walletAddress,
         signMessage,
       })
+      const normalizedMessage = noncePayload.message.replace(/\r\n/g, "\n")
       const signature = await signMessage(
-        new TextEncoder().encode(noncePayload.message)
+        new TextEncoder().encode(normalizedMessage)
       )
 
       send({ type: "VERIFY" })
@@ -188,7 +189,7 @@ export function WalletAuth({ open, onOpenChange, onSignedIn }: Props) {
       const verified = await signIn({
         walletAddress,
         nonce: noncePayload.nonce,
-        message: noncePayload.message,
+        message: normalizedMessage,
         signature: bs58.encode(signature),
         device,
       })

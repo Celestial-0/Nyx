@@ -34,7 +34,10 @@ const envSchema = z.object({
   AUTH_JWT_ISSUER: z.string().min(1).default("nyx-server"),
   AUTH_JWT_AUDIENCE: z.string().min(1).default("nyx-clients"),
   AUTH_TOKEN_VERSION: parsePositiveInt(2),
-  AUTH_SIWS_DOMAIN: z.string().default("nyx.local"),
+  AUTH_SIWS_DOMAIN: z
+    .string()
+    .transform((val) => val.replace(/^https?:\/\//i, "").replace(/\/+$/, ""))
+    .default("nyx.local"),
   AUTH_SIWS_URI: z.string().default("http://localhost:3000"),
   AUTH_SIWS_STATEMENT: z
     .string()

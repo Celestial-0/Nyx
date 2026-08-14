@@ -49,9 +49,10 @@ const buildSiwsMessage = ({
   nonce,
   issuedAt,
   expiresAt,
-}: NonceRecord) =>
-  [
-    `${env.AUTH_SIWS_DOMAIN} wants you to sign in with your Solana account:`,
+}: NonceRecord) => {
+  const domain = env.AUTH_SIWS_DOMAIN.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+  return [
+    `${domain} wants you to sign in with your Solana account:`,
     walletAddress,
     "",
     env.AUTH_SIWS_STATEMENT,
@@ -62,7 +63,10 @@ const buildSiwsMessage = ({
     `Nonce: ${nonce}`,
     `Issued At: ${issuedAt}`,
     `Expiration Time: ${expiresAt}`,
-  ].join("\n");
+  ]
+    .join("\n")
+    .replace(/\r\n/g, "\n");
+};
 
 const createNonceRecord = (walletAddress: string): NonceRecord => {
   const now = new Date();
@@ -209,8 +213,10 @@ const verifyWalletSignature = ({
       return false;
     }
 
+    const normalizedMessage = message.replace(/\r\n/g, "\n");
+
     return nacl.sign.detached.verify(
-      textEncoder.encode(message),
+      textEncoder.encode(normalizedMessage),
       signatureBytes,
       publicKey
     );
@@ -488,12 +494,21 @@ export const authService = {
     }
 
     const expectedMessage = buildSiwsMessage(record);
+    const normalizedMessage = message.replace(/\r\n/g, "\n");
 
-    if (expectedMessage !== message) {
+    if (expectedMessage !== normalizedMessage) {
+      log.warn(
+        {
+          walletAddress,
+          expectedLength: expectedMessage.length,
+          receivedLength: normalizedMessage.length,
+        },
+        "Signed message does not match server-issued message"
+      );
       throw BadRequest("Signed message does not match server-issued message.");
     }
 
-    const signatureValid = verifyWalletSignature({ walletAddress, message, signature });
+    const signatureValid = verifyWalletSignature({ walletAddress, message: normalizedMessage, signature });
 
     if (!signatureValid) {
       throw BadRequest("Invalid signature for provided wallet address.");

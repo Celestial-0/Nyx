@@ -57,8 +57,10 @@ const verifyWalletSignature = ({
       return false;
     }
 
+    const normalizedMessage = message.replace(/\r\n/g, "\n");
+
     return nacl.sign.detached.verify(
-      textEncoder.encode(message),
+      textEncoder.encode(normalizedMessage),
       signatureBytes,
       publicKey
     );
@@ -341,9 +343,10 @@ export const e2eeService = {
     walletAddress: string;
     device: DeviceRegistrationInput;
   }) => {
-    const expectedMessage = buildDeviceRegistrationMessage({ walletAddress, device });
+    const expectedMessage = buildDeviceRegistrationMessage({ walletAddress, device }).replace(/\r\n/g, "\n");
+    const normalizedProofMessage = (device.proof.message || "").replace(/\r\n/g, "\n");
 
-    if (device.proof.message !== expectedMessage) {
+    if (normalizedProofMessage !== expectedMessage) {
       throw BadRequest("Device registration message does not match the submitted device bundle.");
     }
 
