@@ -34,3 +34,8 @@ No identities. No tracking. Just communication.
 ## Status
 
 🚧 In active development
+
+
+<!--
+claude --resume 6be0550f-bf19-442c-8f15-818c4a92c052
+-->

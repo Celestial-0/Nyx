@@ -8,13 +8,14 @@
   "type": "module",
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.9.16",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "turbo": "^2.10.2",
+    "viem": "^2.54.1"
   },
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "lint": "turbo run lint"
+    "dev": "node_modules/@turbo/windows-64/bin/turbo.exe run dev",
+    "build": "node_modules/@turbo/windows-64/bin/turbo.exe run build",
+    "lint": "node_modules/@turbo/windows-64/bin/turbo.exe run lint"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

@@ -66,11 +66,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/$'
-    | '/llms-full.txt'
-    | '/llms.txt'
-    | '/api/search'
-    | '/llms.mdx/docs/$'
+    '/$' | '/llms-full.txt' | '/llms.txt' | '/api/search' | '/llms.mdx/docs/$'
   fileRoutesByTo: FileRoutesByTo
   to: '/$' | '/llms-full.txt' | '/llms.txt' | '/api/search' | '/llms.mdx/docs/$'
   id:

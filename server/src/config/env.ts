@@ -3,6 +3,12 @@ import { z } from "zod";
 const parsePositiveInt = (fallback: number) =>
   z.coerce.number().int().positive().catch(fallback);
 
+const optionalTrimmedString = () =>
+  z
+    .string()
+    .optional()
+    .transform((val) => (val && val.trim() !== "" ? val.trim() : undefined));
+
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required."),
   JWT_SECRET: z.string().min(1, "JWT_SECRET is required."),
@@ -14,7 +20,7 @@ const envSchema = z.object({
   AUTH_ACCESS_TOKEN_TTL_SECONDS: parsePositiveInt(3600),
   AUTH_REFRESH_TOKEN_TTL_SECONDS: parsePositiveInt(604800),
   MESSAGE_RETENTION_DAYS: parsePositiveInt(30),
-  REALTIME_NODE_ID: z.string().min(1).optional(),
+  REALTIME_NODE_ID: optionalTrimmedString(),
   REALTIME_ACTIVE_CONNECTION_TTL_SECONDS: parsePositiveInt(90),
   REALTIME_MESSAGE_DEDUPE_TTL_SECONDS: parsePositiveInt(86400),
   REALTIME_RATE_LIMIT_CAPACITY: parsePositiveInt(20),
@@ -23,8 +29,8 @@ const envSchema = z.object({
   SOLANA_COMMITMENT: z.enum(["processed", "confirmed", "finalized"]).default("confirmed"),
   PAYMENT_TREASURY_WALLET: z.string().min(1).default("11111111111111111111111111111111"),
   PAYMENT_CREDITS_PER_SOL: parsePositiveInt(1000),
-  CORS_ALLOWED_ORIGINS: z.string().optional(),
-  WS_ALLOWED_ORIGINS: z.string().optional(),
+  CORS_ALLOWED_ORIGINS: optionalTrimmedString(),
+  WS_ALLOWED_ORIGINS: optionalTrimmedString(),
   AUTH_JWT_ISSUER: z.string().min(1).default("nyx-server"),
   AUTH_JWT_AUDIENCE: z.string().min(1).default("nyx-clients"),
   AUTH_TOKEN_VERSION: parsePositiveInt(2),

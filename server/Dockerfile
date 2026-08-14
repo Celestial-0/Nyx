@@ -1,25 +1,38 @@
-# Use the official lightweight Bun image
-FROM oven/bun:1.3-alpine AS base
+# syntax=docker/dockerfile:1
 
-# Set working directory inside the container
+# ------------------------------------------------------------------------------
+# Stage 1: Dependency resolution (Cached efficiently by lockfile)
+# ------------------------------------------------------------------------------
+FROM oven/bun:1.3-alpine AS deps
 WORKDIR /app
 
-# Copy lockfile and package configuration
+# Copy dependency manifests
 COPY package.json bun.lock ./
 
-# Install dependencies
+# Install dependencies (utilizing lockfile cache when available)
 RUN bun install
 
-# Copy the rest of the server source code
-COPY . .
+# ------------------------------------------------------------------------------
+# Stage 2: Production runtime (< 130MB total image footprint)
+# ------------------------------------------------------------------------------
+FROM oven/bun:1.3-alpine AS runner
+WORKDIR /app
 
-# Port configuration (can be overridden at build time via --build-arg PORT=xxxx)
-ARG PORT=5000
-ENV PORT=${PORT}
-EXPOSE ${PORT}
-
-# Set production environment variables by default
+# Set production environment flag (All secrets and URLs are injected at runtime via environment)
 ENV NODE_ENV=production
 
-# Start the Hono server
-CMD ["bun", "run", "src/main.ts"]
+# Copy cached dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json bun.lock tsconfig.json drizzle.config.ts ./
+
+# Copy database schema & migrations
+COPY drizzle ./drizzle
+
+# Copy backend source code
+COPY src ./src
+
+# Expose API port
+EXPOSE 5000
+
+# Run automatic database migrations then boot Hono API server
+CMD ["sh", "-c", "bun run db:migrate && bun run src/main.ts"]

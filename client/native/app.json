@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Nyx",
+    "slug": "nyx",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/nyx.png",
+    "scheme": "nyx",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nyx.app"
+    },
+    "android": {
+      "package": "com.nyx.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/nyx.png",
+        "backgroundColor": "#000000"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/nyx.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/nyx.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ],
+      "expo-status-bar",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

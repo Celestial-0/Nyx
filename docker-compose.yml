@@ -1,5 +1,52 @@
 name: nyx
+
 services:
+  # ==============================================================================
+  # PostgreSQL 18 (Alpine) - Relational Database Engine (< 90MB)
+  # [SECURITY]: No ports exposed to host. Accessible ONLY internally via nyx-network:5432
+  # ==============================================================================
+  postgres:
+    image: postgres:18-alpine
+    container_name: nyx-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - nyx-network
+
+  # ==============================================================================
+  # Redis 8 (Alpine) - High-Performance Cache & Realtime Pub/Sub (< 35MB)
+  # [SECURITY]: No ports exposed to host. Accessible ONLY internally via nyx-network:6379
+  # ==============================================================================
+  redis:
+    image: redis:8.10.0-alpine
+    container_name: nyx-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - nyx-network
+
+  # ==============================================================================
+  # Nyx Backend Server (Bun + Hono + Drizzle ORM)
+  # ==============================================================================
   server:
     build:
       context: ./server
@@ -8,8 +55,76 @@ services:
     restart: unless-stopped
     ports:
       - "${PORT:-5000}:${PORT:-5000}"
-    command: sh -c "bun run db:migrate && bun run src/main.ts"
-    env_file:
-      - .env
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # --- System & Runtime ---
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-5000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      # --- Database & Cache Connection Strings ---
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+
+      # --- Authentication & Secrets ---
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_JWT_ISSUER: ${AUTH_JWT_ISSUER}
+      AUTH_JWT_AUDIENCE: ${AUTH_JWT_AUDIENCE}
+      AUTH_TOKEN_VERSION: ${AUTH_TOKEN_VERSION}
+
+      # --- Auth Token TTLs (in Seconds) ---
+      AUTH_NONCE_TTL_SECONDS: ${AUTH_NONCE_TTL_SECONDS}
+      AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS}
+      AUTH_REFRESH_TOKEN_TTL_SECONDS: ${AUTH_REFRESH_TOKEN_TTL_SECONDS}
+
+      # --- SIWS (Sign-In with Solana) Configuration ---
+      AUTH_SIWS_DOMAIN: ${AUTH_SIWS_DOMAIN}
+      AUTH_SIWS_URI: ${AUTH_SIWS_URI}
+      AUTH_SIWS_STATEMENT: ${AUTH_SIWS_STATEMENT}
+
+      # --- Realtime WebSocket & Retention Settings ---
+      MESSAGE_RETENTION_DAYS: ${MESSAGE_RETENTION_DAYS}
+      REALTIME_NODE_ID: ${REALTIME_NODE_ID}
+      REALTIME_ACTIVE_CONNECTION_TTL_SECONDS: ${REALTIME_ACTIVE_CONNECTION_TTL_SECONDS}
+      REALTIME_MESSAGE_DEDUPE_TTL_SECONDS: ${REALTIME_MESSAGE_DEDUPE_TTL_SECONDS}
+      REALTIME_RATE_LIMIT_CAPACITY: ${REALTIME_RATE_LIMIT_CAPACITY}
+      REALTIME_RATE_LIMIT_REFILL_PER_SECOND: ${REALTIME_RATE_LIMIT_REFILL_PER_SECOND}
+
+      # --- Solana Network & Payments Gateway ---
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL}
+      SOLANA_COMMITMENT: ${SOLANA_COMMITMENT}
+      PAYMENT_TREASURY_WALLET: ${PAYMENT_TREASURY_WALLET}
+      PAYMENT_CREDITS_PER_SOL: ${PAYMENT_CREDITS_PER_SOL}
+
+      # --- Origin Security & Whitelisting (Vercel Client) ---
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      WS_ALLOWED_ORIGINS: ${WS_ALLOWED_ORIGINS}
+    networks:
+      - nyx-network
+    healthcheck:
+      test: ["CMD-SHELL", "bun -e \"fetch('http://localhost:' + (process.env.PORT || 5000) + '/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# ==============================================================================
+# Persistent Named Volumes (Data persists across container restarts & redeploys)
+# ==============================================================================
+volumes:
+  postgres_data:
+    name: nyx-postgres-data
+  redis_data:
+    name: nyx-redis-data
+
+# ==============================================================================
+# Isolated Internal Bridge Network
+# ==============================================================================
+networks:
+  nyx-network:
+    name: nyx-network
+    driver: bridge
