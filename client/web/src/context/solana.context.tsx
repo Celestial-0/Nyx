@@ -15,8 +15,7 @@ type SolanaProviderProps = {
 };
 
 export function SolanaProvider({ children }: SolanaProviderProps) {
-  const endpoint =
-    import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl("mainnet-beta");
+  const endpoint = useMemo(() => clusterApiUrl("mainnet-beta"), []);
   const wallets = useMemo(() => [], []);
   const handleWalletError = (error: unknown) => {
     const walletError = error as { name?: string; message?: string };

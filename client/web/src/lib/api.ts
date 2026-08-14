@@ -23,12 +23,8 @@ const apiBaseUrl =
 export const API_BASE_URL = apiBaseUrl.replace(/\/+$/, "")
 
 /** Token storage keys for localStorage */
-export const TOKEN_STORAGE_KEY =
-  coerceEnvValue(import.meta.env.VITE_LOCAL_STORAGE_ACCESS_TOKEN) ??
-  "nyx_access_token"
-export const REFRESH_TOKEN_STORAGE_KEY =
-  coerceEnvValue(import.meta.env.VITE_LOCAL_STORAGE_REFRESH_TOKEN) ??
-  "nyx_refresh_token"
+export const TOKEN_STORAGE_KEY = "nyx_access_token"
+export const REFRESH_TOKEN_STORAGE_KEY = "nyx_refresh_token"
 
 /** API Error response shape (internal) */
 export type ApiErrorResponse = {

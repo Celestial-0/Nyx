@@ -30,7 +30,5 @@ const apiBaseUrl =
 export const API_BASE_URL = apiBaseUrl.replace(/\/+$/, '');
 
 /** SecureStore keys for the auth tokens. */
-export const TOKEN_STORAGE_KEY =
-  coerceEnvValue(process.env.EXPO_PUBLIC_ACCESS_TOKEN_KEY) ?? 'nyx_access_token';
-export const REFRESH_TOKEN_STORAGE_KEY =
-  coerceEnvValue(process.env.EXPO_PUBLIC_REFRESH_TOKEN_KEY) ?? 'nyx_refresh_token';
+export const TOKEN_STORAGE_KEY = 'nyx_access_token';
+export const REFRESH_TOKEN_STORAGE_KEY = 'nyx_refresh_token';
